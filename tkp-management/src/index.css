@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@media (max-width: 768px) {
+  .grid-cols-2 {
+    grid-template-columns: repeat(1, auto);
+  }
+}
+
+@media print {
+  body {
+    margin: 1cm; /* Adjust the margin value as needed */
+  }
+
+  #mortgage-container {
+    overflow: visible;
+    height: fit-content;
+  }
+
+  #mortgageTable {
+    page-break-inside: auto;
+    width: 100%; /* Ensures the table takes full width on print */
+    border-collapse: collapse; /* Ensures borders are visible on print */
+  }
+}
