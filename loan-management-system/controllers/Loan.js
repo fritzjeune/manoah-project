@@ -2,14 +2,30 @@ const {sequelize, Loan, LoanStatus, Borrower, Pledge, Payment, PaymentMethod, Re
 const { Op } = require('sequelize');
 
 
-const getAllLoans = async (req, res) => {
+const getAllLoansForBorrower = async (req, res) => {
     const { borrowerId } = req.params
     try {
         const loans = await Loan.findAll({
             where: {
                 borrower_id: borrowerId
             },
-            include: [{model: Pledge}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}]
+            include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}]
+        });
+        res.status(200).json(loans);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+const getAllLoans = async (req, res) => {
+    try {
+        const loans = await Loan.findAll({
+            // TODO: readd where clause base on request queries
+            // where: {
+            //     borrower_id: borrowerId
+            // },
+            include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}]
         });
         res.status(200).json(loans);
     } catch (error) {
@@ -19,10 +35,10 @@ const getAllLoans = async (req, res) => {
 };
 
 const getLoanById = async (req, res) => {
-    const { id } = req.params;
+    const { loanId } = req.params;
     try {
-        const loan = await Loan.findByPk(id, {
-            include: [{model: Pledge}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}]
+        const loan = await Loan.findByPk(loanId, {
+            include: [{model: Pledge},  {model: Borrower}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}]
         });
         if (!loan) {
             return res.status(404).json({ error: 'Loan not found' });
@@ -138,6 +154,7 @@ const deleteLoan = async (req, res) => {
 
 module.exports = {
     getAllLoans,
+    getAllLoansForBorrower,
     getLoanById,
     getLoansByApprovalDate,
     createLoan,

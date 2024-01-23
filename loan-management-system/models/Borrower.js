@@ -15,6 +15,20 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        gender: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        nif: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+        },
+        ninu: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+        },
         first_name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -38,7 +52,6 @@ module.exports = (sequelize) => {
         email: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
         },
         created_by: {
             type: DataTypes.INTEGER,

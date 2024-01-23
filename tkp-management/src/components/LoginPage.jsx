@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
     // State to manage form inputs
@@ -7,6 +8,8 @@ const LoginPage = () => {
         password: '',
     });
 
+    const navigate = useNavigate()
+
     // Function to handle form submission
     const handleLogin = (e) => {
         e.preventDefault();
@@ -14,6 +17,7 @@ const LoginPage = () => {
         // Simulate login process (replace with actual authentication logic)
         if (formData.username === 'demoUser' && formData.password === 'demoPassword') {
             alert('Login successful!');
+            navigate('/borrowers')
         } else {
             alert('Invalid username or password. Please try again.');
         }
@@ -27,7 +31,7 @@ const LoginPage = () => {
             <div className="max-w-md w-full p-6 bg-white rounded-md shadow-md">
                 <div className="mb-4 text-center">
                     {/* Replace 'YourCompanyLogo.png' with the actual logo file */}
-                    <img src="YourCompanyLogo.png" alt="Company Logo" className="mx-auto h-16 mb-4" />
+                    <img src="YourCompanyLogo.png" alt="TKP" className="mx-auto h-16 mb-4" />
                     <h2 className="text-2xl font-semibold text-gray-800">Login to Your Account</h2>
                 </div>
                 <form onSubmit={handleLogin}>
@@ -41,7 +45,7 @@ const LoginPage = () => {
                             name="username"
                             value={formData.username}
                             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                            className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-secondary"
                             placeholder="Enter your username"
                             required
                         />
@@ -75,7 +79,7 @@ const LoginPage = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+                        className="w-full py-2 px-4 bg-secondary text-white border-2 rounded-md hover:bg-my_gray hover:text-secondary hover:border-secondary box-border focus:outline-none focus:ring focus:border-blue-300"
                     >
                         Login
                     </button>

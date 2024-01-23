@@ -26,7 +26,8 @@ const PersonalReferencesForm = ({ onSubmit }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-md shadow-md">
+        <form onSubmit={handleSubmit} className="w-[500px] mx-auto p-6 bg-white rounded-md shadow-md">
+            <h1 className='text-3xl mb-[10px] font-semibold text-primary'>Reference Person</h1>
             <div className="mb-4">
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-600">
                     Last Name <span className="text-red-500">*</span>

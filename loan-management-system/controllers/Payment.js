@@ -6,7 +6,7 @@ const {
 
 const createPayment = async (req, res) => {
     let passedPayment = req.body;
-    const {borrowerid, loanId} = req.params
+    const {borrowerId, loanId} = req.params
     console.log(req.params)
     try {
         // Check if the loan exists
@@ -60,7 +60,7 @@ const getPaymentsForLoan = async (req, res) => {
 
 const updatePayment = async (req, res) => {
     const paymentId = req.params.id;
-    const {borrowerid, loanId} = req.params
+    // const {borrowerid, loanId} = req.params
     const updatedPaymentData = req.body;
 
     try {

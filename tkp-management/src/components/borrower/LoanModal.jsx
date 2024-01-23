@@ -5,8 +5,6 @@ import LoanModalActions from './LoanMorgageActions';
 import { getListDateFromRange } from '../functions/date';
 
 
-
-
 const LoanModal = ({ isOpen, onRequestClose, onLoanSubmit }) => {
     const [amountRequested, setAmountRequested] = useState('');
     const [interestRate, setInterestRate] = useState('');
@@ -16,6 +14,7 @@ const LoanModal = ({ isOpen, onRequestClose, onLoanSubmit }) => {
     const [loanDetails, setLoanDetails] = useState({
         amountRequested: 0,
         interestRate: 0,
+        interestMethod: 1,
         mortgageLength: 0,
         reason: '',
         approvalDate: '',
@@ -23,6 +22,25 @@ const LoanModal = ({ isOpen, onRequestClose, onLoanSubmit }) => {
         totalLoan: 0,
     });
     const [showMortgageTable, setShowMortgageTable] = useState(false);
+    const [interestMethod, setInterestMethod] = useState([
+        {
+            name: "Annually",
+            value: 4
+        },
+        {
+            name: "Monthly",
+            value: 3
+        },
+        {
+            name: "Monthly",
+            value: 2
+        },
+        {
+            name: "Weekly",
+            value: 1
+        },
+    ])
+
 
     const generateLoanDetails = () => {
         let loanPaymentsDetails = []
@@ -61,7 +79,7 @@ const LoanModal = ({ isOpen, onRequestClose, onLoanSubmit }) => {
             totalInterest,
             totalLoan,
         }));
-    }, [loanDetails.amountRequested, loanDetails.interestRate, loanDetails.mortgageLength, loanDetails.approvalDate]);
+    }, [loanDetails.amountRequested, loanDetails.interestRate, loanDetails.mortgageLength, loanDetails.approvalDate, loanDetails.interestMethod]);
 
     const handleLoanSubmit = async () => {
         // Validation logic
@@ -137,113 +155,127 @@ const LoanModal = ({ isOpen, onRequestClose, onLoanSubmit }) => {
         <Modal
             isOpen={isOpen}
             onRequestClose={onRequestClose}
-            overlayClassName="fixed inset-0 bg-blue-100 opacity-100"
-            // bodyOpenClassName=" opacity-100"
-            // portalClassName=" opacity-100",
-            
-            className="absolute top-1/2 opacity-100 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-md"
+            overlayClassName="fixed inset-0 bg-blue-100 backdrop-sepia-0 bg-gray-800/80"
+            shouldCloseOnOverlayClick={false}
+            // portalClassName="opacity-100"
+            transparent={true}
+            // bodyOpenClassName=" opacity-100"  
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-md "
         >
-            <h2 className="text-2xl font-semibold mb-4">Add New Loan</h2>
-            <div className="flex flex-wrap items-center" ref={modalContentRef}>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                    <label className="block text-sm font-medium text-gray-700">Amount Requested:</label>
-                    <input
-                        type="number"
-                        value={loanDetails.amountRequested}
-                        onChange={(e) => setLoanDetails((prevLoanDetails) => ({
-                            ...prevLoanDetails,
-                            amountRequested: parseFloat(e.target.value)
-                        }))}
-                        className="mt-1 p-2 w-full border rounded-md"
-                        placeholder="Enter amount requested"
-                    />
-                </div>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                    <label className="block text-sm font-medium text-gray-700">Interest Rate:</label>
-                    <input
-                        type="number"
-                        value={loanDetails.interestRate}
-                        onChange={(e) => setLoanDetails((prevLoanDetails) => ({
-                            ...prevLoanDetails,
-                            interestRate: parseFloat(e.target.value)
-                        }))}
-                        className="mt-1 p-2 w-full border rounded-md"
-                        placeholder="Enter interest rate"
-                    />
-                </div>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                    <label className="block text-sm font-medium text-gray-700">Mortgage Length (months):</label>
-                    <input
-                        type="number"
-                        value={loanDetails.mortgageLength}
-                        onChange={(e) => setLoanDetails((prevLoanDetails) => ({
-                            ...prevLoanDetails,
-                            mortgageLength: parseFloat(e.target.value)
-                        }))}
-                        className="mt-1 p-2 w-full border rounded-md"
-                        placeholder="Enter mortgage length"
-                    />
-                </div>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                    <label className="block text-sm font-medium text-gray-700">Reason for the Loan:</label>
-                    <input
-                        type="text"
-                        value={loanDetails.reason}
-                        onChange={(e) => setLoanDetails((prevLoanDetails) => ({
-                            ...prevLoanDetails,
-                            reason: e.target.value
-                        }))}
-                        className="mt-1 p-2 w-full border rounded-md"
-                        placeholder="Enter reason for the loan"
-                    />
-                </div>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                    <label className="block text-sm font-medium text-gray-700">Approval Date:</label>
-                    <input
-                        type="date"
-                        value={loanDetails.approvalDate}
-                        onChange={(e) => setLoanDetails((prevLoanDetails) => ({
-                            ...prevLoanDetails,
-                            approvalDate: e.target.value
-                        }))}
-                        className="mt-1 p-2 w-full border rounded-md"
-                    />
-                </div>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                <label className="block text-sm font-medium text-gray-700">Total Interest:</label>
-                    <input
-                        type="text"
-                        value={loanDetails.totalInterest.toFixed(2)}
-                        readOnly
-                        className="mt-1 p-2 w-full border rounded-md bg-gray-100"
-                    />
-                </div>
-                <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
-                <label className="block text-sm font-medium text-gray-700 mt-2">Total Loan:</label>
-                    <input
-                        type="text"
-                        value={loanDetails.totalLoan.toFixed(2)}
-                        readOnly
-                        className="mt-1 p-2 w-full border rounded-md bg-gray-100"
-                    />
-                </div>
-                <div className="flex-grow w-full mt-[20px]">
-                    <button
-                        onClick={handleLoanSubmit}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        Add Loan
-                    </button>
-                    <button
-                        onClick={() => setShowMortgageTable(true)}
-                        className="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"
-                    >
-                        Generate Loan Details
-                    </button>
-                    <LoanModalActions generateMortgageTable={GenerateMortgageTable} referTo={modalContentRef} />
-                </div>
-                <div className=' overflow-y-scroll h-[500px] w-full mt-[20px]' id='mortgage-container'>
-                    {showMortgageTable && <GenerateMortgageTable />}
+            <div className=' opacity-100'>
+                <h2 className="text-2xl font-semibold mb-4">Add New Loan</h2>
+                <div className="flex flex-wrap items-center" ref={modalContentRef}>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                        <label className="block text-sm font-medium text-gray-700">Amount Requested:</label>
+                        <input
+                            type="number"
+                            value={loanDetails.amountRequested}
+                            onChange={(e) => setLoanDetails((prevLoanDetails) => ({
+                                ...prevLoanDetails,
+                                amountRequested: parseFloat(e.target.value)
+                            }))}
+                            className="mt-1 p-2 w-full border rounded-md"
+                            placeholder="Enter amount requested"
+                        />  
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                        <label className="block text-sm font-medium text-gray-700">Interest Method:</label>
+                        <select name="" id="" defaultValue={loanDetails.interestMethod} className=' mt-1 p-2 w-full border rounded-md' onChange={(e) => setLoanDetails((prevLoanDetails) => ({
+                                ...prevLoanDetails,
+                                interestMethod: parseFloat(e.target.value)
+                            }))}>
+                            {interestMethod.map((method, id) => (
+                                <option id={id} value={method.value}>{method.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                        <label className="block text-sm font-medium text-gray-700">Interest Rate:</label>
+                        <input
+                            type="number"
+                            value={loanDetails.interestRate}
+                            onChange={(e) => setLoanDetails((prevLoanDetails) => ({
+                                ...prevLoanDetails,
+                                interestRate: parseFloat(e.target.value)
+                            }))}
+                            className="mt-1 p-2 w-full border rounded-md"
+                            placeholder="Enter interest rate"
+                        />
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                        <label className="block text-sm font-medium text-gray-700">Mortgage Length (months):</label>
+                        <input
+                            type="number"
+                            value={loanDetails.mortgageLength}
+                            onChange={(e) => setLoanDetails((prevLoanDetails) => ({
+                                ...prevLoanDetails,
+                                mortgageLength: parseFloat(e.target.value)
+                            }))}
+                            className="mt-1 p-2 w-full border rounded-md"
+                            placeholder="Enter mortgage length"
+                        />
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                        <label className="block text-sm font-medium text-gray-700">Reason for the Loan:</label>
+                        <input
+                            type="text"
+                            value={loanDetails.reason}
+                            onChange={(e) => setLoanDetails((prevLoanDetails) => ({
+                                ...prevLoanDetails,
+                                reason: e.target.value
+                            }))}
+                            className="mt-1 p-2 w-full border rounded-md"
+                            placeholder="Enter reason for the loan"
+                        />
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                        <label className="block text-sm font-medium text-gray-700">Approval Date:</label>
+                        <input
+                            type="date"
+                            value={loanDetails.approvalDate}
+                            onChange={(e) => setLoanDetails((prevLoanDetails) => ({
+                                ...prevLoanDetails,
+                                approvalDate: e.target.value
+                            }))}
+                            className="mt-1 p-2 w-full border rounded-md"
+                        />
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                    <label className="block text-sm font-medium text-gray-700">Total Interest:</label>
+                        <input
+                            type="text"
+                            value={loanDetails.totalInterest.toFixed(2)}
+                            readOnly
+                            className="mt-1 p-2 w-full border rounded-md bg-gray-100"
+                        />
+                    </div>
+                    <div className="flex-grow w-full sm:w-1/2 lg:w-1/3 mb-4 sm:mb-0 pr-4">
+                    <label className="block text-sm font-medium text-gray-700 mt-2">Total Loan:</label>
+                        <input
+                            type="text"
+                            value={loanDetails.totalLoan.toFixed(2)}
+                            readOnly
+                            className="mt-1 p-2 w-full border rounded-md bg-gray-100"
+                        />
+                    </div>
+                    <div className="flex-grow w-full mt-[20px]">
+                        <button
+                            onClick={handleLoanSubmit}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+                        >
+                            Add Loan
+                        </button>
+                        <button
+                            onClick={() => setShowMortgageTable(true)}
+                            className="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"
+                        >
+                            Generate Loan Details
+                        </button>
+                        <LoanModalActions generateMortgageTable={GenerateMortgageTable} referTo={modalContentRef} />
+                    </div>
+                    <div className=' overflow-y-scroll h-[500px] w-full mt-[20px]' id='mortgage-container'>
+                        {showMortgageTable && <GenerateMortgageTable />}
+                    </div>
                 </div>
             </div>
         </Modal>

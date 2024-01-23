@@ -25,11 +25,8 @@ const AddBorrowerPage = () => {
     };
 
     return (
-        <div>
-            <div className='w-100 h-[200px] grid place-items-center  bg-blue-600'>
-                <h2 className=' text-white font-bold text-3xl px-[200px] text-center' >Ajouter un Client</h2>
-            </div>
-            {/* Render each form component */}
+        <div className=' p-[40px]'>
+            <h1 className=' text-secondary font-bold text-4xl'>Enregistrer un nouveau client</h1>
             <BasicInfoForm onSubmit={handleBasicInfoSubmit} />
             {/* <AddressContactForm onSubmit={handleAddressContactSubmit} />
             <PersonalReferencesForm onSubmit={handleReferencesSubmit} /> */}

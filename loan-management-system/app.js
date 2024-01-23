@@ -1,5 +1,8 @@
 const express = require('express');
+const cron = require('node-cron');
 const passport = require('passport');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const {
     Strategy: JwtStrategy,
     ExtractJwt
@@ -10,13 +13,18 @@ const {
 } = require('./config/sequelize');
 const userRoutes = require('./routes/User');
 const borrowerRoutes = require('./routes/Borrower');
+const loanRoutes = require('./routes/Loan');
 const loginRoutes = require('./routes/Auth');
+const paymentRoutes = require('./routes/Payment');
 const session = require('express-session');
 const verifyTokenInDatabase = require('./middlewares/Auth')
 // const passportConfig = require('./config/passport');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3010;
+
+// initiating swagger in my app
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 passport.serializeUser((user, done) => {
@@ -63,6 +71,13 @@ passport.use(
     })
 );
 
+
+// // Schedule a task to run every 15 seconds
+// cron.schedule('*/15 * * * * *', () => {
+//     // Your task logic goes here
+//     console.log('Task executed every 15 seconds');
+// });
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({
@@ -84,6 +99,8 @@ app.use(passport.initialize());
 app.use('/api/users', userRoutes);
 app.use('/api/auth', loginRoutes);
 app.use('/api/borrower', borrowerRoutes);
+app.use('/api/loans', loanRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Apply verification middleware after initializing Passport
 app.use(verifyTokenInDatabase);

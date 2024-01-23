@@ -10,6 +10,19 @@ const pledgeController = require('../controllers/Pledge')
 const referencePersonController = require('../controllers/ReferencePerson')
 
 // Define routes for Borrower
+/**
+ * @swagger
+ *   tags:
+ *     - Borrowers
+ * /api/borrowers:
+ *   get:
+ *     summary: Get all borrowers
+ *     responses:
+ *       '200':
+ *         description: A successful response
+ *       '400':
+ *          description: Error getting borrowers
+ */
 router.get('/', passport.authenticate('jwt', { session: false }), borrowerController.getAllBorrowers);
 router.get('/:id', passport.authenticate('jwt', { session: false }), borrowerController.getBorrowerById);
 router.post('/', passport.authenticate('jwt', { session: false }), borrowerController.createBorrower);
@@ -23,8 +36,8 @@ router.post('/:borrowerId/address', passport.authenticate('jwt', { session: fals
 router.post('/:borrowerId/contact', passport.authenticate('jwt', { session: false }), contactController.createContact);
 
 // Loan routes
-router.get('/:borrowerId/loans/approval-date', passport.authenticate('jwt', { session: false }), loanController.getLoansByApprovalDate);
-router.get('/:borrowerId/loans', passport.authenticate('jwt', { session: false }), loanController.getAllLoans);
+// router.get('/:borrowerId/loans/approval-date', passport.authenticate('jwt', { session: false }), loanController.getLoansByApprovalDate);
+router.get('/:borrowerId/loans', passport.authenticate('jwt', { session: false }), loanController.getAllLoansForBorrower);
 router.get('/:borrowerId/loans/:loanId', passport.authenticate('jwt', { session: false }), loanController.getLoanById);
 router.post('/:borrowerId/loans', passport.authenticate('jwt', { session: false }), loanController.createLoan);
 router.put('/:borrowerId/loans/:loanId', passport.authenticate('jwt', { session: false }), loanController.updateLoan);

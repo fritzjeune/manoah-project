@@ -3,7 +3,7 @@ import {
     fetchBaseQuery
 } from '@reduxjs/toolkit/query/react'
 import { Mutex } from 'async-mutex'
-import axios from '../../components/axios/axios';
+import axios from '../../axios/privateAxios';
 
 // create a new mutex
 const mutex = new Mutex()

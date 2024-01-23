@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    activePage: sessionStorage.getItem("activePage") !== 'undefined' ? JSON.parse(sessionStorage.getItem("activePage")) : 0,
+    activePage: 0,
+    activeMainOption: 0,
+    // activePage: sessionStorage.getItem("activePage") !== 'undefined' ? JSON.parse(sessionStorage.getItem("activePage")) : 0,
     activeFormWindows: 0,
     isPopupVisible: false,
     notificationBody: {},
@@ -22,6 +24,10 @@ export const pageSlice = createSlice({
             state.displayMenu = false
             window.sessionStorage.setItem("activePage", JSON.stringify(state.activePage))
         },
+        setActiveMainOption: (state, action) => {
+            state.activeMainOption = action.payload
+        },
+
         openPopup: (state) => {
             state.isPopupVisible = true
         },
@@ -67,5 +73,21 @@ export const pageSlice = createSlice({
 })
 
 
-export const { setActivePage, setUser, logOut, toggleDisplayMenu, setNotificationBody, openNotification, closeNotification, setPopContent, closePopup, openPopup, nextFormWindows, prevFormWindows, changeActiveFormWindows } = pageSlice.actions;
+export const { 
+    setActivePage,
+    setActiveMainOption,
+    changeActiveFormWindows,
+
+    setUser, 
+    logOut, 
+    toggleDisplayMenu, 
+    setNotificationBody, 
+    openNotification, 
+    closeNotification, 
+    setPopContent, 
+    closePopup, 
+    openPopup, 
+    nextFormWindows, 
+    prevFormWindows, 
+} = pageSlice.actions;
 export default pageSlice.reducer;
