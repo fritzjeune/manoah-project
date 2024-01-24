@@ -1,26 +1,61 @@
 // BasicInfoForm.js
 import React, { useState } from 'react';
+import { useCreateBorrowerMutation } from '../features/borrower/borrowerSlice';
 
 const BasicInfoForm = ({ onSubmit }) => {
     const [formData, setFormData] = useState({
-        lastName: '',
-        firstName: '',
-        birthDate: '',
-        cityOfBirth: '',
-        stateOfBirth: '',
+        last_name: '',
+        first_name: '',
+        birthdate: '',
+        city_of_birth: '',
+        state_of_birth: '',
+        country_of_birth: 'HT',
+        gender: '',
         nif: '',
+        ninu: '',
         occupation: '',
-        profilePicture: null, // To store the selected image file
+        email: '',
+        address: {
+            street: '',
+            city: '',
+            province: '',
+            state: '',
+            country: 'HT'
+        },
+        contacts: [
+            {
+                phone_number: '509 32090900'
+            }
+        ],
+        profil_img_url: null, // To store the selected image file
     });
+    const [phone, setPhone] = useState('')
+
+    const [createBorrower, {}] = useCreateBorrowerMutation()
+
+    const addressFieldHandler = (field) => (e) => {
+        setFormData({...formData, address: {...formData.address, [field]: e.target.value}, })
+    }
+
+    const addPhoneHandler = () => () => {
+        setFormData({...formData, contacts: formData.contacts.concat({phone_number: phone})})
+        setPhone('')
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        createBorrower(formData)
+        .then((data) => {
+            console.log(data)
+        })
+        .catch((err) => {
+            if (err) throw err
+        });
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        setFormData({ ...formData, profilePicture: file });
+        setFormData({ ...formData, profil_img_url: file });
     };
 
     return (
@@ -30,29 +65,44 @@ const BasicInfoForm = ({ onSubmit }) => {
                     <div className=' h-fit grid grid-cols-3 gap-[20px]'>
                         <div className="col-span-3">
                             <label htmlFor="lastName" className="block font-medium text-lg text-blue-400">
-                                Last Name <span className="text-red-500">*</span>
+                                Nom <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
-                                id="lastName"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                id="last_name"
+                                name="last_name"
+                                value={formData.last_name}
+                                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="Enter last name"
+                                placeholder="Entrer "
                                 required
                             />
                         </div>
-                        <div className="col-span-3">
+                        <div className="col-span-2">
                             <label htmlFor="firstName" className="block font-medium text-lg text-blue-400">
-                                First Name <span className="text-red-500">*</span>
+                                Prenom <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 id="firstName"
                                 name="firstName"
-                                value={formData.firstName}
-                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                value={formData.first_name}
+                                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                                placeholder="Enter first name"
+                                required
+                            />
+                        </div>
+                        <div className="">
+                            <label htmlFor="firstName" className="block font-medium text-lg text-blue-400">
+                                Sexe <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="gender"
+                                name="gender"
+                                value={formData.gender}
+                                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter first name"
                                 required
@@ -69,7 +119,7 @@ const BasicInfoForm = ({ onSubmit }) => {
                                 value={formData.nif}
                                 onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="Enter NIF"
+                                placeholder="0010000000"
                                 required
                             />
                         </div>
@@ -81,10 +131,10 @@ const BasicInfoForm = ({ onSubmit }) => {
                                 type="text"
                                 id="ninu"
                                 name="ninu"
-                                value={formData.nif}
-                                onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
+                                value={formData.ninu}
+                                onChange={(e) => setFormData({ ...formData, ninu: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="Enter NINU"
+                                placeholder="1000000000"
                                 // required
                             />
                         </div>
@@ -99,47 +149,47 @@ const BasicInfoForm = ({ onSubmit }) => {
                                 value={formData.occupation}
                                 onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="Enter occupation"
+                                placeholder="Agronome"
                             />
                         </div>
                         <div className="">
                             <label htmlFor="birthDate" className="block font-medium text-lg text-blue-400">
-                                Birthday <span className="text-red-500">*</span>
+                                Date de Naissance <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="date"
-                                id="birthDate"
-                                name="birthDate"
-                                value={formData.birthDate}
-                                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                                id="birthdate"
+                                name="birthdate"
+                                value={formData.birthdate}
+                                onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 required
                             />
                         </div>
                         <div className="">
                             <label htmlFor="cityOfBirth" className="block font-medium text-lg text-blue-400">
-                                City of Birth
+                                Ville de Naissance
                             </label>
                             <input
                                 type="text"
-                                id="cityOfBirth"
-                                name="cityOfBirth"
-                                value={formData.cityOfBirth}
-                                onChange={(e) => setFormData({ ...formData, cityOfBirth: e.target.value })}
+                                id="city_of_birth"
+                                name="city_of_b?irth"
+                                value={formData.city_of_birth}
+                                onChange={(e) => setFormData({ ...formData, city_of_birth: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter city of birth"
                             />
                         </div>
                         <div className="">
                             <label htmlFor="stateOfBirth" className="block font-medium text-lg text-blue-400">
-                                State of Birth
+                                Departement de Naissance
                             </label>
                             <input
                                 type="text"
-                                id="stateOfBirth"
-                                name="stateOfBirth"
-                                value={formData.stateOfBirth}
-                                onChange={(e) => setFormData({ ...formData, stateOfBirth: e.target.value })}
+                                id="state_of_birth"
+                                name="state_of_birth"
+                                value={formData.state_of_birth}
+                                onChange={(e) => setFormData({ ...formData, state_of_birth: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter state of birth"
                             />
@@ -148,34 +198,43 @@ const BasicInfoForm = ({ onSubmit }) => {
                     </div>
                     <h1 className=' text-secondary font-semibold text-2xl my-[20px] p-[10px] bg-my_gray'>Informations de contact</h1>
                     <div className='grid grid-cols-3 gap-[20px]'>
-                        <div className="">
+                        {formData.contacts?.map((contact, i) => {
+                            return (
+                                <div className="">
+                                    <label htmlFor="occupation" className="block text-lg text-blue-400 font-medium">
+                                        Phone {i + 1}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id={i}
+                                        name={`contact_${i}`}
+                                        value={contact.phone_number}
+                                        readOnly
+                                        className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                                    />
+                                </div>
+                            )
+                        })}
+                        
+                        {formData.contacts.length < 2 && <div className=" relative">
                             <label htmlFor="occupation" className="block text-lg text-blue-400 font-medium">
-                                hone 
+                                Telephone
                             </label>
                             <input
                                 type="text"
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                                id="phone"
+                                name="phone"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter occupation"
                             />
-                        </div>
-                        <div className="">
-                            <label htmlFor="occupation" className="block text-lg text-blue-400 font-medium">
-                                Telephone Secondaire
-                            </label>
-                            <input
-                                type="text"
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-                                className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="Enter occupation"
-                            />
-                        </div>
+                            <button
+                                type="button"
+                                onClick={addPhoneHandler()}
+                                className="w-fit m-auto py-[10px] px-[20px] bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 absolute"
+                                >+</button>
+                        </div>}
                         <div></div>
                         <div className="col-span-2">
                             <label htmlFor="occupation" className="block text-lg text-blue-400 font-medium">
@@ -183,10 +242,10 @@ const BasicInfoForm = ({ onSubmit }) => {
                             </label>
                             <input
                                 type="text"
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter occupation"
                             />
@@ -202,8 +261,8 @@ const BasicInfoForm = ({ onSubmit }) => {
                                 type="text"
                                 id="occupation"
                                 name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                                value={formData.address?.state}
+                                onChange={addressFieldHandler('state')}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter occupation"
                             />
@@ -214,10 +273,10 @@ const BasicInfoForm = ({ onSubmit }) => {
                             </label>
                             <input
                                 type="text"
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                                id="province"
+                                name="province"
+                                value={formData.address?.province}
+                                onChange={addressFieldHandler('province')}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter occupation"
                             />
@@ -228,10 +287,10 @@ const BasicInfoForm = ({ onSubmit }) => {
                             </label>
                             <input
                                 type="text"
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                                id="city"
+                                name="city"
+                                value={formData.address?.city}
+                                onChange={addressFieldHandler('city')}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                                 placeholder="Enter occupation"
                             />
@@ -242,12 +301,12 @@ const BasicInfoForm = ({ onSubmit }) => {
                             </label>
                             <input
                                 type="text"
-                                id="occupation"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                                id="street"
+                                name="street"
+                                value={formData.address?.street}
+                                onChange={addressFieldHandler('street')}
                                 className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                                placeholder="Enter occupation"
+                                placeholder="no 31, Rue pierre Sully"
                             />
                         </div>
                     </div>

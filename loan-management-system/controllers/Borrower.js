@@ -39,7 +39,13 @@ const getBorrowerById = async (req, res) => {
 };
 
 const createBorrower = async (req, res) => {
+    const user = req.user
+    req.body.created_by = user.dataValues?.user_id
+    if (req.body.address && !req.body.address?.is_property_owner) {
+        req.body.address.is_property_owner = false
+    }
     const borrowerData = req.body;
+    console.log(borrowerData)
     try {
         // Create borrower
         const newBorrower = await Borrower.create(borrowerData)

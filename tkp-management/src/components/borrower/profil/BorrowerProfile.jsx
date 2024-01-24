@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom'; // Assuming you use React Router for navigation
 import ReviewLine from '../../minis/ReviewLine';
 import ProfileOptions from './ProfilOptions';
 import LoanModal from '../LoanModal';
-import LoanModalADB from '../../loan/LoanModalADB';
+import { useGetBorrowerMutation } from '../../features/borrower/borrowerSlice';
 
 
 const BorrowerProfile = ({ loans }) => {
-    const { loanId } = useParams(); // Assuming loanId is part of the route parameters
+    const { id } = useParams(); // Assuming loanId is part of the route parameters
     const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+    const [borrower, setBorrower] = useState()
     const handleLoanSubmit = (payment) => {
         // Handle payment submission logic here
         console.log('Payment submitted:', payment);
@@ -17,8 +18,23 @@ const BorrowerProfile = ({ loans }) => {
         setIsLoanModalOpen(false);
     };
 
+    const [getBorrower , {}] = useGetBorrowerMutation()
+
+    useEffect(() => {
+        console.log(id)
+        if (id) {
+            getBorrower(id)
+            .then((data) => {
+                console.log(data)
+                if (data) {
+                    setBorrower(data.data)
+                }
+            })
+        }
+    }, [])
+
     // Find the selected loan based on loanId
-    const testBorrower = {
+    const borrowers = {
         lastname: 'Doe',
         firstname: 'John',
         birthDate: '1990-01-01',
@@ -59,7 +75,7 @@ const BorrowerProfile = ({ loans }) => {
             },
             // Add more personal references as needed
         ],
-        loan: {
+        loans: {
             amountRequested: 50000,
             interestRate: 5.5,
             mortgageLength: 36,
@@ -69,18 +85,18 @@ const BorrowerProfile = ({ loans }) => {
             // Add more details as needed
         }
     };
-    // const testBorrower = loans.find((loan) => loan.no === parseInt(loanId, 10));
+    // const borrower = loans.find((loan) => loan.no === parseInt(loanId, 10));
 
-    if (!testBorrower) {
+    if (!borrower) {
         return <div>Loan not found</div>;
     }
 
-    // const { no, lastname, firstname, amountApprouved, balance, endDate, status, advisor } = testBorrower;
+    // const { no, lastname, firstname, amountApprouved, balance, endDate, status, advisor } = borrower;
 
     return (
-        <div className='p-[20px]'>
+        borrower && <div className='p-[20px]'>
             <div className='flex items-center gap-[20px] mb-[20px]'>
-                <h1 className=' text-primary font-extrabold text-3xl'>{testBorrower.lastname + " " + testBorrower.firstname}</h1>
+                <h1 className=' text-primary font-extrabold text-3xl'>{borrower.last_name + " " + borrower.first_name}</h1>
                 <p className=' bg-yellow-300 px-[30px] py-[5px] rounded-lg'>Active</p>
             </div>
 
@@ -90,7 +106,7 @@ const BorrowerProfile = ({ loans }) => {
                     <div className="flex items-center justify-center mb-4 w-[200px]">
                         <img
                             src="./profil-avatar.webp" // Replace with the actual URL for the avatar image
-                            alt={`Avatar for ${testBorrower.firstname} ${testBorrower.lastname}`}
+                            alt={`Avatar for ${borrower.first_name} ${borrower.last_name}`}
                             className="rounded-full h-full w-full"
                         />
                     </div>
@@ -99,61 +115,61 @@ const BorrowerProfile = ({ loans }) => {
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Last Name"
-                            text={testBorrower.lastname}
+                            text={borrower.last_name}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="first Name"
-                            text={testBorrower.firstname}
+                            text={borrower.first_name}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="NIF"
-                            text={testBorrower.nif}
+                            text={borrower.nif}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Birth Date"
-                            text={testBorrower.birthDate}
+                            text={borrower.birthdate}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="gender"
-                            text={testBorrower.gender}
+                            text={borrower.gender}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Ville de naissance"
-                            text={testBorrower.cityOfBirth}
+                            text={borrower.city_of_birth}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Departement de naissance"
-                            text={testBorrower.stateOfBirth}
+                            text={borrower.state_of_birth}
                         />
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Occupation"
-                            text={testBorrower.occupation}
+                            text={borrower.occupation}
                         />
-                        <ReviewLine
+                        { <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Mortgage Lenth"
-                            text={testBorrower.address[0]?.street}
-                        />
+                            text={borrower.address?.street}
+                        />}
                         <ReviewLine
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Regestered Date"
-                            text={testBorrower.createdAt}
+                            text={borrower.createdAt}
                         />
                     </div>
                     <div className='flex flex-col gap-[10px] relative'>
@@ -214,7 +230,7 @@ export default BorrowerProfile;
 //     };
 
 //     const renderAddress = () => {
-//         return testBorrower.address.map((add, index) => (
+//         return borrower.address.map((add, index) => (
 //             <div key={index} className="bg-white p-4 mb-4 rounded-md shadow-md">
 //                 <h2 className="text-xl font-semibold mb-2 text-blue-600">Adresse:</h2>
 //                 <div>
@@ -228,20 +244,20 @@ export default BorrowerProfile;
 //     };
 
 //     const renderContacts = () => {
-//         let contact = testBorrower.contacts
+//         let contact = borrower.contacts
 //         return  (
 //             <div className="bg-white p-4 mb-4 rounded-md shadow-md">
 //                 <h2 className="text-xl font-semibold mb-2 text-blue-600">Contacts:</h2>
 //                 <div>
 //                     {contact.phones.map((phone) => <div className='grid grid-cols-2 text-lg'><span className="font-semibold text-blue-600">:</span> <span>{phone}</span></div>)}
-//                     <div className='grid grid-cols-2 text-lg'><span className="font-semibold text-blue-600">Ville:</span> <span>{testBorrower.contacts.email}</span></div>
+//                     <div className='grid grid-cols-2 text-lg'><span className="font-semibold text-blue-600">Ville:</span> <span>{borrower.contacts.email}</span></div>
 //                 </div>
 //             </div>
 //         )
 //     };
 
 //     const renderReferences = () => {
-//         return testBorrower.personalReferences.map((reference, index) => (
+//         return borrower.personalReferences.map((reference, index) => (
 //             <div key={index} className="bg-white p-4 mb-4 rounded-md shadow-md">
 //                 <p><span className="font-semibold">Last Name:</span> {reference.lastName}</p>
 //                 <p><span className="font-semibold">First Name:</span> {reference.firstName}</p>
@@ -261,17 +277,17 @@ export default BorrowerProfile;
 //                 <div className=' mx-auto w-full col-span-3'>
 //                     <div className='flex flex-row' >
 //                         <div className="bg-white p-6 mb-6 rounded-md shadow-md" style={{ width : "calc(100% - 200px)"}}>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">Last Name:</span> <span>{testBorrower.lastName}</span></div>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">First Name:</span> <span>{testBorrower.firstName}</span></div>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">Birth Date:</span> <span>{testBorrower.birthDate}</span></div>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">City of Birth:</span> <span>{testBorrower.cityOfBirth}</span></div>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">State of Birth:</span> <span>{testBorrower.stateOfBirth}</span></div>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">NIF:</span> <span>{testBorrower.nif}</span></div>
-//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">Occupation:</span> <span>{testBorrower.occupation}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">Last Name:</span> <span>{borrower.lastName}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">First Name:</span> <span>{borrower.firstName}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">Birth Date:</span> <span>{borrower.birthDate}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">City of Birth:</span> <span>{borrower.cityOfBirth}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">State of Birth:</span> <span>{borrower.stateOfBirth}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">NIF:</span> <span>{borrower.nif}</span></div>
+//                             <div className='grid grid-cols-3 text-lg '><span className=" text-blue-600 font-semibold">Occupation:</span> <span>{borrower.occupation}</span></div>
 //                         </div>
-//                         {testBorrower.image && (
+//                         {borrower.image && (
 //                             <div className="mb-4 w-[200px] h-[200px]">
-//                                 <img src={testBorrower.image} alt="Borrower" className="rounded-full h-full w-full mx-auto mb-2" />
+//                                 <img src={borrower.image} alt="Borrower" className="rounded-full h-full w-full mx-auto mb-2" />
 //                             </div>
 //                         )}
 //                     </div>
@@ -295,7 +311,7 @@ export default BorrowerProfile;
 //                     <LoanModal isOpen={isLoanModalOpen} onRequestClose={closeLoanModal} onLoanSubmit={handleLoanSubmit} />
 //                 </div>
 //                 <div className='col-span-2'>
-//                     <LoanPreviewCard loanDetails={testBorrower.loan} />
+//                     <LoanPreviewCard loanDetails={borrower.loan} />
 //                 </div>
 //             </div>
             

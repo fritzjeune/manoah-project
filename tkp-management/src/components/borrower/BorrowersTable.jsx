@@ -24,7 +24,7 @@ const BorrowersTable = ({data}) => {
         { Header: 'NIF.', accessor: 'nif', filter: 'text' },
         { Header: 'NINU.', accessor: 'ninu', filter: 'text' },
         { Header: 'Date d\'Affiliation.', accessor: 'createdAt', filter: 'date' },
-        { Header: 'Loan Active', accessor: 'loans[0].loan_id', filter: 'text' },
+        { Header: 'Loan Active', accessor: 'loans[0].loan_status_id', filter: 'text' },
         {
             Header: 'Options',
             accessor: 'options',

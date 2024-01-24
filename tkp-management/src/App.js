@@ -34,9 +34,9 @@ function App() {
                     <Route path="/" element={<MainAppContainer />}>
                         <Route path="/loans" element={<LoanPage />} />
                         <Route path="/loan-profil" element={<LoanProfil />} />
-                        <Route path="/borrowers" element={<BorrowersPage />} />
+                        <Route strict exact path="/borrowers" element={<BorrowersPage />} />
                         <Route path="/add-borrowers" element={<AddBorrowerPage />} />
-                        <Route path="/borrower-profil" element={<BorrowerProfile />} />
+                        <Route path="/borrowers/:id" element={<BorrowerProfile />} /> 
                     </Route>
                 </Routes>
             </Router>
