@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLoginUserMutation } from './features/user/userSlice';
 
 const LoginPage = () => {
     // State to manage form inputs
@@ -9,15 +10,22 @@ const LoginPage = () => {
     });
 
     const navigate = useNavigate()
+    const [loginUser, { data }] = useLoginUserMutation()
 
     // Function to handle form submission
     const handleLogin = (e) => {
         e.preventDefault();
-
-        // Simulate login process (replace with actual authentication logic)
-        if (formData.username === 'demoUser' && formData.password === 'demoPassword') {
-            alert('Login successful!');
-            navigate('/borrowers')
+        if (formData.username && formData.password) {
+            loginUser(formData).then((result) => {
+                console.log(result.data)
+                if (result.data) {
+                    window.sessionStorage.setItem('accessToken', result.data.accessToken)
+                    window.sessionStorage.setItem('refreshToken', result.data.refreshToken)
+                }
+                navigate('/borrowers')
+            }).catch((err) => {
+                console.log(err)
+            });
         } else {
             alert('Invalid username or password. Please try again.');
         }
@@ -65,7 +73,7 @@ const LoginPage = () => {
                             required
                         />
                     </div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col items-center justify-between mb-4">
                         <div>
                             <a href="/reset-password" className="text-blue-500 hover:underline">
                                 Forgot password?

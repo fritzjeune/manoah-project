@@ -10,7 +10,7 @@ const mutex = new Mutex()
 
 // const BACK_END_URL = "http://192.206.141.224:8088/api/v1";
 // const BACK_END_URL = "http://192.168.100.10/api/v1";
-const BACK_END_URL = "http://127.0.0.1:8000/api/";
+const BACK_END_URL = "http://127.0.0.1:3010/api/";
 // const BACK_END_URL = "";
 
 const baseQuery = fetchBaseQuery({
@@ -18,7 +18,7 @@ const baseQuery = fetchBaseQuery({
     prepareHeaders: (headers) => {
         // headers.set("Content-Type", "application/json");
         headers.set("Access-Control-Allow-Origin", "*/*");
-        let token = window.sessionStorage.getItem("back_token");
+        let token = window.sessionStorage.getItem("accessToken");
         if (token) {
             headers.set("Authorization", `Bearer ${token}`);
         }
@@ -35,7 +35,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     if (result.error && result.error.status === 403) {
         if (!mutex.isLocked()) {
             const release = await mutex.acquire()
-            const refreshToken = window.sessionStorage.getItem("refresh_token");
+            const refreshToken = window.sessionStorage.getItem("refreshToken");
             // console.log(refreshToken)
             try {
                 // const refreshResult = 
@@ -47,7 +47,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
                     }
                 ).then(async (res) => {
                     // store the new token
-                    window.sessionStorage.setItem('back_token', res.data['Jwt-Token'])
+                    window.sessionStorage.setItem('accessToken', res.data['accessToken'])
                     // retry the initial query
                     result = await baseQuery(args, api, extraOptions);
                 }).catch((err) => {

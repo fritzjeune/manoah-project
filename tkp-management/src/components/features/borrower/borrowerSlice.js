@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 import { apiSlice } from "../api/apiSlice";
-import axios from "axios";
 
 // const config = {
 //     headers: {
@@ -241,7 +240,7 @@ const borrowerListAdapter = createEntityAdapter({
 
 export const borrowerApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
-        getBorrowerList: builder.query({
+        getBorrowerList: builder.mutation({
             query: () => ({
                 url: '/borrower',
                 method: "GET"
@@ -378,7 +377,7 @@ export default borrowerSlice.reducer;
 export const {
     useGetBorrowerMutation,
     useCreateBorrowerMutation,
-    useGetBorrowerListQuery,
+    useGetBorrowerListMutation,
     useGetBorrowerLoansMutation,
     useUpdateBorrowerMutation,
     useUpdateBorrowerLoanMutation,

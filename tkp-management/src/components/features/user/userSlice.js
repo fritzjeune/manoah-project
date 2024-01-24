@@ -20,6 +20,14 @@ const userApiSlice = apiSlice.injectEndpoints({
             }),
             providesTags: ["User"],
         }),
+        loginUser: builder.mutation({
+            query: (user) => ({
+                url: 'auth/login',
+                method: "POST",
+                body: user
+            }),
+            providesTags: ["User"],
+        }),
         getUsers: builder.mutation({
             query: () => ({
                 url: `/account`,
@@ -128,6 +136,7 @@ export const {
 export default userSlice.reducer;
 export const {
     useCreateUserMutation,
+    useLoginUserMutation,
     useGetUsersMutation,
     useGetUserMutation,
     useUpdateUserMutation,

@@ -3,65 +3,28 @@ import { useTable, useFilters } from 'react-table';
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const BorrowersTable = () => {
+const BorrowersTable = ({data}) => {
     // Replace this data with your actual loan data
-    const data = [
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
-        // Add more rows as needed
-    ];
+    // const data = [
+    //     { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
+    //     { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
+    //     { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
+    //     { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
+    //     { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
+    //     { no: 1, last_name: 'Jean Jacques', first_name: 'Philippe', gender: "M", birthdate: "1992-01-01", nif: "001-001-003-0", createdAt: '2021-01-01', activeLoan: true },
+    //     // Add more rows as needed
+    // ];
 
     const columns = [
-        { Header: 'No', accessor: 'no' },
-        { Header: 'First Name', accessor: 'first_name', filter: 'text' },
+        { Header: 'No', accessor: 'borrower_id' },
+        { Header: 'Nom', accessor: 'last_name', filter: 'text' },
+        { Header: 'Prenom', accessor: 'first_name', filter: 'text' },
         { Header: 'Gender', accessor: 'gender', filter: 'text' },
         { Header: 'Birth Date', accessor: 'birthdate', filter: 'date' },
         { Header: 'NIF.', accessor: 'nif', filter: 'text' },
+        { Header: 'NINU.', accessor: 'ninu', filter: 'text' },
         { Header: 'Date d\'Affiliation.', accessor: 'createdAt', filter: 'date' },
-        { Header: 'Loan Active', accessor: 'activeLoan', filter: 'bool' },
+        { Header: 'Loan Active', accessor: 'loans[0].loan_id', filter: 'text' },
         {
             Header: 'Options',
             accessor: 'options',

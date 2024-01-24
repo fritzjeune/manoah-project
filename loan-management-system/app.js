@@ -1,5 +1,6 @@
 const express = require('express');
 const cron = require('node-cron');
+const cors = require('cors')
 const passport = require('passport');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
@@ -22,6 +23,9 @@ const verifyTokenInDatabase = require('./middlewares/Auth')
 
 const app = express();
 const PORT = process.env.PORT || 3010;
+
+// Cors policies
+app.use(cors())
 
 // initiating swagger in my app
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
