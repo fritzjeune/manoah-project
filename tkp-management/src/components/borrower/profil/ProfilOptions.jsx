@@ -3,13 +3,14 @@ import { useState } from "react";
 import Savings from "./Savings";
 import Contacts from "./Contacts";
 
-const ProfileOptions = () => {
+const ProfileOptions = ({loans, contacts, address, email}) => {
     const [actWindow, setActWindow] = useState(0);
     const entOptions = [
         "Loans",
         "Saving",
         "Contacts",
     ];
+    console.log(address)
 
     return (
         <div className="" style={{ height: "500px", display: "grid", gap: "20px", gridTemplateRows: "50px calc(100%-50px)", justifyItems: ""}}>
@@ -28,11 +29,11 @@ const ProfileOptions = () => {
                 ))}
             </div>
             {actWindow === 0 ? (
-                <BorrowerLoans />
+                <BorrowerLoans loans={loans} />
             ) : actWindow === 1 ? (
                 <Savings />
             ) : actWindow === 2 ? (
-                <Contacts />
+                <Contacts contacts={contacts} email={email} address={address} />
             ) : (
                 <></>
             )

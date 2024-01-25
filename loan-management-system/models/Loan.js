@@ -23,6 +23,19 @@ module.exports = (sequelize) => {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
         },
+        amount_approuved: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+        },
+        payment_frequence: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+            references: {
+                model: 'loan_payment_frequence',
+                key: 'id',
+            },
+            default: 2
+        },
         interest_rate: {
             type: DataTypes.DECIMAL(5, 2),
             allowNull: false,
@@ -51,15 +64,15 @@ module.exports = (sequelize) => {
             type: DataTypes.DATE,
             allowNull: false,
         },
-        loan_status_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'loan_status',
-                key: 'id',
-            },
-            default: 1
-        }
+        // loan_status: {
+        //     type: DataTypes.INTEGER,
+        //     allowNull: false,
+        //     references: {
+        //         model: 'loan_status',
+        //         key: 'id',
+        //     },
+        //     default: 1
+        // }
     });
 
     // Loan.associate = (models) => {

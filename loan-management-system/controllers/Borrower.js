@@ -1,4 +1,4 @@
-const { Borrower, Payment, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson } = require('../config/sequelize');
+const { Borrower, Payment, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod } = require('../config/sequelize');
 
 // Controller methods for Borrower
 const getAllBorrowers = async (req, res) => {
@@ -24,7 +24,7 @@ const getBorrowerById = async (req, res) => {
             include: [
                 { model: Address },
                 { model: Contact },
-                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}] }
+                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
             ]
         });
         if (!borrower) {

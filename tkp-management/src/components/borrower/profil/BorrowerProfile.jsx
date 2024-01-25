@@ -169,7 +169,7 @@ const BorrowerProfile = ({ loans }) => {
                             boxStyle="flex-col col-span-4"
                             labelStyle="text-sm text-secondary"
                             label="Regestered Date"
-                            text={borrower.createdAt}
+                            text={new Date(borrower.createdAt).toLocaleDateString()}
                         />
                     </div>
                     <div className='flex flex-col gap-[10px] relative'>
@@ -186,7 +186,7 @@ const BorrowerProfile = ({ loans }) => {
                     </div>
                 </div>
                 <div>
-                    <ProfileOptions />
+                    <ProfileOptions loans={borrower.loans} contacts={borrower.contacts} address={borrower.address} email={borrower.email} />
                 </div>
             </div>
             <LoanModal

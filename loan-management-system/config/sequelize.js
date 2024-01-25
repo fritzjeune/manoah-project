@@ -12,6 +12,8 @@ const PledgeStatusModel = require('../models/PledgeStatus')
 const PledgeModel = require('../models/Pledge')
 const PaymentMethodModel = require('../models/PaymentMethod')
 const PaymentModel = require('../models/Payment')
+const LoanPaymentFrequenceModel = require('../models/LoanPaymentFrequence')
+const InterestMethodModel = require('../models/InterestMethod')
 
 const sequelize = new Sequelize({
     dialect: 'postgres',
@@ -44,6 +46,8 @@ const PledgeStatus = PledgeStatusModel(sequelize);
 const Pledge = PledgeModel(sequelize);
 const PaymentMethod = PaymentMethodModel(sequelize);
 const Payment = PaymentModel(sequelize);
+const LoanPaymentFrequence = LoanPaymentFrequenceModel(sequelize);
+const InterestMethod = InterestMethodModel(sequelize);
 
 Borrower.hasMany(Contact, {
     foreignKey: 'borrower_id',
@@ -63,8 +67,7 @@ Borrower.hasMany(Loan, {
 });
 
 Loan.belongsTo(Borrower, {
-    foreignKey: 'borrower_id',
-    onDelete: 'CASCADE',
+    foreignKey: 'borrower_id'
 });
 Loan.hasMany(Pledge, {
     foreignKey: 'loan_id',
@@ -78,13 +81,21 @@ Loan.hasMany(ReferencePerson, {
     foreignKey: 'loan_id',
     onDelete: 'CASCADE',
 });
-Loan.belongsTo(LoanStatus, {
-    foreignKey: 'loan_status_id',
-    onDelete: 'CASCADE',
+
+Loan.hasOne(LoanStatus, {
+    foreignKey: 'id',
 });
+
+Loan.hasOne(LoanPaymentFrequence, {
+    foreignKey: 'id'
+});
+
+Loan.hasOne(InterestMethod, {
+    foreignKey: 'id'
+});
+
 Payment.belongsTo(PaymentMethod, {
-    foreignKey: 'payment_method_id',
-    onDelete: 'CASCADE',
+    foreignKey: 'payment_method_id'
 });
 // // Sync models with the database
 // sequelize.sync({ alter: true }).then(() => {
@@ -107,5 +118,7 @@ module.exports = {
     Pledge,
     PledgeStatus,
     PaymentMethod,
-    Payment
+    Payment,
+    LoanPaymentFrequence,
+    InterestMethod
 }

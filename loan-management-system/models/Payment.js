@@ -24,6 +24,18 @@ module.exports = (sequelize) => {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
         },
+        capital: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+        },
+        interest: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+        },
+        penalities: {
+            type: DataTypes.DECIMAL(15, 2),
+            allowNull: false,
+        },
         payment_method_id: {
             type: DataTypes.INTEGER,
             allowNull: false,

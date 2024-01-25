@@ -2,7 +2,7 @@ import React from 'react'
 import ReviewLine from '../../minis/ReviewLine'
 import { useNavigate } from 'react-router-dom'
 
-const LoanItem = ({isClosed}) => {
+const LoanItem = ({loan}) => {
     const navigate = useNavigate()
     return (
         <div className='flex flex-shrink-0 rounded-xl overflow-hidden' onClick={() => navigate('/loan-profil')}>
@@ -14,41 +14,41 @@ const LoanItem = ({isClosed}) => {
                     boxStyle="flex-col"
                     labelStyle="text-sm text-secondary"
                     label="Approuved Date"
-                    text="2022-12-10"
+                    text={new Date(loan.approval_date).toLocaleDateString()}
                 />
                 <ReviewLine
                     boxStyle="flex-col"
                     labelStyle="text-sm text-secondary"
                     label="Mortgage Date"
-                    text="2022-12-10"
+                    text={new Date(loan.approval_date).getDate()}
                 />
                 <ReviewLine
                     boxStyle="flex-col "
                     labelStyle="text-sm text-secondary"
                     label="End Date"
-                    text="2024-12-11"
+                    text={new Date(loan.payment_end_date).toLocaleDateString()}
                 />
                 <ReviewLine
                     boxStyle="flex-col"
                     labelStyle="text-sm text-secondary"
                     label="Approuved Amount"
-                    text="300000"
+                    text={loan.approuved_amount}
                 />
                 <ReviewLine
                     boxStyle="flex-col"
                     labelStyle="text-sm text-secondary"
                     label="Total Loan"
-                    text="330000"
+                    text={loan.total_loan}
                 />
                 <ReviewLine
                     boxStyle="flex-col"
                     labelStyle="text-sm text-secondary"
                     label="Status"
-                    text="Active"
+                    text={loan.loan_status?.value}
                 />
             </div>
-            <div className={`w-[60px] ${isClosed ? 'bg-yellow-200' : 'bg-secondary'} flex justify-center`}>
-                <p style={{ writingMode: 'vertical-lr', margin: 'auto'}}>{isClosed ? "Closed" : "Active"}</p>
+            <div className={`w-[60px] ${loan.loan_status?.id === 3 ? 'bg-yellow-200' : loan.loan_status?.id === 2 ? 'bg-red-500' : 'bg-secondary'} flex justify-center`}>
+                <p style={{ writingMode: 'vertical-lr', margin: 'auto'}}>{loan.loan_status?.id === 3 ? "Closed" : "Active"}</p>
             </div>
         </div>
     )
