@@ -1,4 +1,4 @@
-const {sequelize, Loan, LoanStatus, Borrower, Pledge, Payment, PaymentMethod, ReferencePerson} = require('../config/sequelize');
+const {sequelize, Loan, LoanStatus, Borrower, Pledge, Payment, PaymentMethod, ReferencePerson, LoanPaymentFrequence} = require('../config/sequelize');
 const { Op } = require('sequelize');
 
 
@@ -25,7 +25,7 @@ const getAllLoans = async (req, res) => {
             // where: {
             //     borrower_id: borrowerId
             // },
-            include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}]
+            include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, {model: LoanStatus}, {model: LoanPaymentFrequence}, { model: Payment, include: [{ model: PaymentMethod }]}]
         });
         res.status(200).json(loans);
     } catch (error) {

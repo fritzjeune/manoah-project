@@ -78,6 +78,14 @@ const login = async (req, res) => {
 const refreshAccessToken = async (req, res) => {
     try {
         // Extract user ID from the current authenticated user
+
+
+        if (!req.user) {
+            return res.status(401).json({
+                message: 'No user found'
+            });
+        }
+
         const userId = req.user.user_id;
 
         // Extract refresh token from the request body

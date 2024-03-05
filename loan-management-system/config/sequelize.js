@@ -30,7 +30,6 @@ const sequelize = new Sequelize({
 })
 
 sequelize.models = {};
-// sequelize.modelManager.models = {};
 sequelize.modelManager.all = {};
 
 const Role = RoleModel(sequelize);
@@ -82,8 +81,8 @@ Loan.hasMany(ReferencePerson, {
     onDelete: 'CASCADE',
 });
 
-Loan.hasOne(LoanStatus, {
-    foreignKey: 'id',
+Loan.belongsTo(LoanStatus, {
+    foreignKey: 'loan_status_id'
 });
 
 Loan.hasOne(LoanPaymentFrequence, {
@@ -97,7 +96,8 @@ Loan.hasOne(InterestMethod, {
 Payment.belongsTo(PaymentMethod, {
     foreignKey: 'payment_method_id'
 });
-// // Sync models with the database
+
+// Sync models with the database
 // sequelize.sync({ alter: true }).then(() => {
 //     console.log('Database synced');
 // }).catch((error) => {

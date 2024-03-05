@@ -54,7 +54,6 @@ const createBorrower = async (req, res) => {
 
         // If an address is provided in the request body, associate it with the borrower
         let id = borrowerJson
-        console.log(id)
         if (req.body.address) {
             const addressData = req.body.address;
             addressData.borrower_id = borrowerJson.borrower_id

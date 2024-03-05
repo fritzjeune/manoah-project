@@ -27,8 +27,8 @@ module.exports = (sequelize) => {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
         },
-        payment_frequence: {
-            type: DataTypes.DECIMAL(15, 2),
+        payment_frequence_id: {
+            type: DataTypes.INTEGER,
             allowNull: false,
             references: {
                 model: 'loan_payment_frequence',
@@ -49,6 +49,10 @@ module.exports = (sequelize) => {
             allowNull: false,
         },
         approval_date: {
+            type: DataTypes.DATE,
+            allowNull: false,
+        },
+        requested_at: {
             type: DataTypes.DATE,
             allowNull: false,
         },
