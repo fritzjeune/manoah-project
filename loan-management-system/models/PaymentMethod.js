@@ -13,6 +13,9 @@ module.exports = (sequelize) => {
             allowNull: false,
             unique: true,
         },
+    }, {
+        freezeTableName: true,
+        timestamps: false
     });
 
     return PaymentMethod;

@@ -11,9 +11,17 @@ const TokenModel = require('../models/Token')
 const PledgeStatusModel = require('../models/PledgeStatus')
 const PledgeModel = require('../models/Pledge')
 const PaymentMethodModel = require('../models/PaymentMethod')
-const PaymentModel = require('../models/Payment')
 const LoanPaymentFrequenceModel = require('../models/LoanPaymentFrequence')
 const InterestMethodModel = require('../models/InterestMethod')
+const VersementModel = require('../models/Versement')
+const VersementMetadataModel = require('../models/VersementMetadata')
+const DepositModel = require('../models/Deposit')
+const PaymentForModel = require('../models/PaymentFor')
+const BorrowerAccountModel = require('../models/BorrowerAccount')
+const AccountStatusModel = require('../models/AccountStatus')
+const VersementStatusModel = require('../models/VersementStatus')
+const TransactionTypeModel = require('../models/TransactionType')
+const AccountTransactionModel = require('../models/AccountTransaction')
 
 const sequelize = new Sequelize({
     dialect: 'postgres',
@@ -25,7 +33,10 @@ const sequelize = new Sequelize({
     database: 'postgres',
     logging: console.log,
     define: {
-        freezeTableName: true
+        freezeTableName: true,
+    },
+    dialectOptions: {
+        decimalNumbers: true
     }
 })
 
@@ -44,25 +55,32 @@ const Token = TokenModel(sequelize);
 const PledgeStatus = PledgeStatusModel(sequelize);
 const Pledge = PledgeModel(sequelize);
 const PaymentMethod = PaymentMethodModel(sequelize);
-const Payment = PaymentModel(sequelize);
 const LoanPaymentFrequence = LoanPaymentFrequenceModel(sequelize);
 const InterestMethod = InterestMethodModel(sequelize);
+const PaymentFor = PaymentForModel(sequelize);
+const Deposit = DepositModel(sequelize);
+const Versement = VersementModel(sequelize);
+const VersementMetadata = VersementMetadataModel(sequelize);
+const BorrowerAccount = BorrowerAccountModel(sequelize);
+const AccountStatus = AccountStatusModel(sequelize);
+const VersementStatus = VersementStatusModel(sequelize);
+const TransactionType = TransactionTypeModel(sequelize);
+const AccountTransaction = AccountTransactionModel(sequelize);
 
 Borrower.hasMany(Contact, {
     foreignKey: 'borrower_id',
-    onDelete: 'CASCADE'
 });
 Borrower.hasOne(Address, {
     foreignKey: 'borrower_id',
-    onDelete: 'CASCADE'
 });
 Borrower.hasMany(ReferencePerson, {
     foreignKey: 'borrower_id',
-    onDelete: 'CASCADE'
 });
 Borrower.hasMany(Loan, {
     foreignKey: 'borrower_id',
-    onDelete: 'CASCADE'
+});
+Borrower.hasMany(BorrowerAccount, {
+    foreignKey: 'borrower_id',
 });
 
 Loan.belongsTo(Borrower, {
@@ -70,32 +88,54 @@ Loan.belongsTo(Borrower, {
 });
 Loan.hasMany(Pledge, {
     foreignKey: 'loan_id',
-    onDelete: 'CASCADE',
 });
-Loan.hasMany(Payment, {
+Loan.hasMany(Versement, {
     foreignKey: 'loan_id',
-    onDelete: 'CASCADE',
 });
 Loan.hasMany(ReferencePerson, {
     foreignKey: 'loan_id',
-    onDelete: 'CASCADE',
 });
-
 Loan.belongsTo(LoanStatus, {
     foreignKey: 'loan_status_id'
 });
-
 Loan.hasOne(LoanPaymentFrequence, {
     foreignKey: 'id'
 });
-
 Loan.hasOne(InterestMethod, {
     foreignKey: 'id'
 });
 
-Payment.belongsTo(PaymentMethod, {
-    foreignKey: 'payment_method_id'
+Versement.belongsTo(Loan, {
+    foreignKey: 'loan_id'
 });
+Versement.belongsTo(VersementMetadata, {
+    foreignKey: 'versement_metadata_id'
+});
+Versement.belongsTo(VersementStatus, {
+    foreignKey: 'status_id'
+});
+
+BorrowerAccount.belongsTo(AccountStatus, {
+    foreignKey: 'account_status_id'
+});
+BorrowerAccount.belongsTo(Borrower, {
+    foreignKey: 'borrower_id'
+});
+BorrowerAccount.hasMany(AccountTransaction, {
+    foreignKey: 'borrower_account_id'
+});
+
+AccountTransaction.belongsTo(TransactionType, {
+    foreignKey: 'transaction_type_id'
+});
+
+AccountTransaction.belongsTo(BorrowerAccount, {
+    foreignKey: 'borrower_account_id'
+});
+
+// Payment.belongsTo(PaymentMethod, {
+//     foreignKey: 'payment_method_id'
+// });
 
 // Sync models with the database
 // sequelize.sync({ alter: true }).then(() => {
@@ -118,7 +158,15 @@ module.exports = {
     Pledge,
     PledgeStatus,
     PaymentMethod,
-    Payment,
     LoanPaymentFrequence,
-    InterestMethod
+    InterestMethod,
+    PaymentFor,
+    Versement,
+    VersementMetadata,
+    Deposit,
+    BorrowerAccount,
+    AccountStatus,
+    VersementStatus,
+    AccountTransaction,
+    TransactionType
 }

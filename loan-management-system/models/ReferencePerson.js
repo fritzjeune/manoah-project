@@ -42,6 +42,10 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        nif: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         relation_to_borrower: {
             type: DataTypes.STRING,
             allowNull: false,

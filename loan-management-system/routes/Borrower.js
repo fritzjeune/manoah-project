@@ -5,7 +5,7 @@ const borrowerController = require('../controllers/Borrower');
 const addressController = require('../controllers/Address');
 const contactController = require('../controllers/Contact');
 const loanController = require('../controllers/Loan')
-const paymentController = require('../controllers/Payment')
+const paymentController = require('../controllers/Versement')
 const pledgeController = require('../controllers/Pledge')
 const referencePersonController = require('../controllers/ReferencePerson')
 

@@ -2,7 +2,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    const PledgeStatus = sequelize.define('pledge_status', {
+    const PaymentFor = sequelize.define('payment_for', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -12,10 +12,7 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-    }, {
-        freezeTableName: true,
-        timestamps: false
     });
 
-    return PledgeStatus;
+    return PaymentFor;
 };

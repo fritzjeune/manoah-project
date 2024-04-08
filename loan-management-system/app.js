@@ -16,7 +16,8 @@ const userRoutes = require('./routes/User');
 const borrowerRoutes = require('./routes/Borrower');
 const loanRoutes = require('./routes/Loan');
 const loginRoutes = require('./routes/Auth');
-const paymentRoutes = require('./routes/Payment');
+const versementRoutes = require('./routes/Versement');
+const transactionRoutes = require('./routes/Transaction');
 const session = require('express-session');
 const verifyTokenInDatabase = require('./middlewares/Auth')
 // const passportConfig = require('./config/passport');
@@ -104,7 +105,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', loginRoutes);
 app.use('/api/borrower', borrowerRoutes);
 app.use('/api/loans', loanRoutes);
-app.use('/api/payments', paymentRoutes);
+app.use('/api/versements', versementRoutes);
+app.use('/api/account', transactionRoutes);
 
 // Apply verification middleware after initializing Passport
 app.use(verifyTokenInDatabase);

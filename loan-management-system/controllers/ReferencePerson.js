@@ -157,10 +157,44 @@ const getAllReferencePersons = async (req, res) => {
     }
 };
 
+const getAllReferencePersonsByLoan = async (req, res) => {
+    try {
+        const {
+            loanId
+        } = req.params;
+
+        // Check if the loan exists and belongs to the borrower
+        const loan = await Loan.findOne({
+            where: {
+                loan_id: loanId,
+            },
+        });
+        if (!loan) {
+            return res.status(404).json({
+                message: 'Loan not found or does not belong to the borrower'
+            });
+        }
+
+        // Get all reference persons for the loan
+        const referencePersons = await ReferencePerson.findAll({
+            where: {
+                loan_id: loanId
+            },
+        });
+
+        res.status(200).json(referencePersons);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+};
+
 const getReferencePersonById = async (req, res) => {
     try {
         const {
-            borrowerId,
+            // borrowerId,
             loanId,
             id
         } = req.params;
@@ -169,7 +203,7 @@ const getReferencePersonById = async (req, res) => {
         const referencePerson = await ReferencePerson.findOne({
             where: {
                 reference_id: id,
-                borrower_id: borrowerId,
+                // borrower_id: borrowerId,
                 loan_id: loanId
             },
         });
@@ -194,4 +228,5 @@ module.exports = {
     deleteReferencePerson,
     getAllReferencePersons,
     getReferencePersonById,
+    getAllReferencePersonsByLoan
 };

@@ -1,8 +1,10 @@
 // controllers/PaymentController.js
 const {
-    Payment,
+    Versement,
     Loan
 } = require('../config/sequelize');
+
+// amount_approved, mortgage_length, interest_rate, approved_date
 
 const createPayment = async (req, res) => {
     let passedPayment = req.body;

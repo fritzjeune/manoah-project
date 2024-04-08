@@ -11,6 +11,9 @@ module.exports = (sequelize) => {
         pledge_value: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('pledge_value')) || 0;
+            }
         },
         location: {
             type: DataTypes.STRING,

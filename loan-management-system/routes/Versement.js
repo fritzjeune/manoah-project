@@ -1,11 +1,11 @@
 // routes/Payment.js
 const express = require('express');
 const router = express.Router();
-const paymentController = require('../controllers/Payment');
+const versementController = require('../controllers/Versement');
 const passport = require('passport');
 
 // Update a payment
-router.put('/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.updatePayment);
+router.put('/:versementId', passport.authenticate('jwt', { session: false }), versementController.updatePayment);
 
 // // Delete a payment
 // router.delete('/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.deletePayment);

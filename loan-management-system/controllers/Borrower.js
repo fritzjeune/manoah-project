@@ -1,13 +1,16 @@
-const { Borrower, Payment, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod } = require('../config/sequelize');
+const { Borrower, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod, BorrowerAccount, Versement, VersementMetadata } = require('../config/sequelize');
+const { generateCaseNumber } = require('../middlewares/date');
 
 // Controller methods for Borrower
 const getAllBorrowers = async (req, res) => {
     try {
+        
         const borrowers = await Borrower.findAll({
             include: [
                 { model: Address },
                 { model: Contact },
-                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}] }
+                { model: BorrowerAccount },
+                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}] }
             ]
         });
         res.status(200).json(borrowers);
@@ -24,7 +27,8 @@ const getBorrowerById = async (req, res) => {
             include: [
                 { model: Address },
                 { model: Contact },
-                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Payment, include: [{ model: PaymentMethod }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
+                { model: BorrowerAccount },
+                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
             ]
         });
         if (!borrower) {
@@ -48,7 +52,7 @@ const createBorrower = async (req, res) => {
     console.log(borrowerData)
     try {
         // Create borrower
-        const newBorrower = await Borrower.create(borrowerData)
+        let newBorrower = await Borrower.create(borrowerData)
         // Convert the Sequelize instance to JSON
         const borrowerJson = newBorrower.toJSON();
 
@@ -73,6 +77,26 @@ const createBorrower = async (req, res) => {
             const createdContacts = await Contact.bulkCreate(contactDataArray);
             // await newBorrower.setContacts(createdContacts);
         }
+        incremNumber = generateCaseNumber(newBorrower.borrower_id)
+        console.log(incremNumber)
+
+        const borrower_account = await BorrowerAccount.create({
+            borrower_id: newBorrower.borrower_id,
+            devise: 1,
+            balance: 0,
+            account_status_id: 1,
+            minimum_balance: 500,
+            account_number: `01-01-${incremNumber}`
+        })
+
+        newBorrower = await Borrower.findByPk(newBorrower.borrower_id, {
+            include: [
+                { model: Address },
+                { model: Contact },
+                { model: BorrowerAccount },
+                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
+            ]
+        });
 
         // Respond with the created borrower
         res.status(201).json(newBorrower);
@@ -81,6 +105,8 @@ const createBorrower = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+console.log(generateCaseNumber(19))
 
 const updateBorrower = async (req, res) => {
     const { id } = req.params;

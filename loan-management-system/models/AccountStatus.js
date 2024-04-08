@@ -1,8 +1,10 @@
-// models/pledgeStatus.js
-const { DataTypes } = require('sequelize');
+// models/Addresses.js
+const {
+    DataTypes
+} = require('sequelize');
 
 module.exports = (sequelize) => {
-    const PledgeStatus = sequelize.define('pledge_status', {
+    const AccountStatus = sequelize.define('account_status', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -11,11 +13,12 @@ module.exports = (sequelize) => {
         value: {
             type: DataTypes.STRING,
             allowNull: false,
+            unique: true,
         },
     }, {
         freezeTableName: true,
         timestamps: false
     });
 
-    return PledgeStatus;
+    return AccountStatus;
 };
