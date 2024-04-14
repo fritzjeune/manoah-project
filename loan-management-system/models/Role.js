@@ -17,6 +17,7 @@ module.exports = (sequelize) => {
         },
     }, {
         freezeTableName: true,
+        timestamps: false
     });
 
     // Role.sync({ alter: true }).then((result) => {

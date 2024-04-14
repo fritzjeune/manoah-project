@@ -1,5 +1,6 @@
 const {
-    User
+    User,
+    Role
 } = require('../config/sequelize'); // Assuming you've defined the User model
 const bcrypt = require('bcrypt');
 
@@ -13,7 +14,9 @@ const UserController = {
             const hashedPassword = await bcrypt.hash(userData.password, 10);
             userData.password = hashedPassword;
 
-            const newUser = await User.create(userData);
+            const newUser = await User.create(userData, {
+                attributes: {exclude: ['password']},
+            });
             res.status(201).json(newUser);
         } catch (error) {
             console.error(error);
@@ -31,6 +34,7 @@ const UserController = {
                 where: {
                     user_id: userId
                 },
+                attributes: {exclude: ['password']},
                 returning: true, // Return the updated user
             });
             if (updatedRowsCount > 0) {
@@ -99,7 +103,10 @@ const UserController = {
     // Get all users
     getAllUsers: async (req, res) => {
         try {
-            const users = await User.findAll();
+            const users = await User.findAll({
+                attributes: {exclude: ['password']},
+                include: [{model: Role}]
+            });
             res.status(200).json(users);
         } catch (error) {
             console.error(error);
@@ -108,6 +115,15 @@ const UserController = {
             });
         }
     },
+
+    changePassword: async (req, res) => {
+        // TODO: 
+        try {
+            
+        } catch (error) {
+            
+        }
+    }
 };
 
 module.exports = UserController;

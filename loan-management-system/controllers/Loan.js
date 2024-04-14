@@ -1,7 +1,7 @@
-const {sequelize, Loan, LoanStatus, Borrower, Pledge, ReferencePerson, LoanPaymentFrequence, VersementMetadata, Versement, VersementStatus, BorrowerAccount} = require('../config/sequelize');
+const {sequelize, Loan, LoanStatus, Borrower, Pledge, ReferencePerson, LoanPaymentFrequence, VersementMetadata, Versement, VersementStatus, BorrowerAccount, PenalityReport, Disbursement, PaymentMethod, User} = require('../config/sequelize');
 const { Op } = require('sequelize');
-const { getListDateFromRange } = require('../middlewares/date');
-
+const { getListDateFromRange, generateCaseNumber, formatDate } = require('../middlewares/date');
+const penalityFee = 100
 
 const getAllLoansForBorrower = async (req, res) => {
     const { borrowerId } = req.params
@@ -10,7 +10,25 @@ const getAllLoansForBorrower = async (req, res) => {
             where: {
                 borrower_id: borrowerId
             },
-            include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}]
+            include: [
+                {model: Pledge}, 
+                {model: Borrower},
+                {
+                    model: Disbursement, 
+                    include: [
+                        {model: PaymentMethod}, 
+                        {model: User}
+                    ]
+                }, 
+                {model: ReferencePerson}, 
+                {model: LoanStatus}, 
+                {model: LoanPaymentFrequence}, 
+                { 
+                    model: Versement, 
+                    include: [{ model: VersementMetadata }]
+                }
+            ],
+            order: [[{ model: Versement }, 'versement_date', 'ASC']],
         });
         res.status(200).json(loans);
     } catch (error) {
@@ -26,7 +44,25 @@ const getAllLoans = async (req, res) => {
             // where: {
             //     borrower_id: borrowerId
             // },
-            include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, {model: LoanStatus}, {model: LoanPaymentFrequence}, { model: Versement, include: [{ model: VersementMetadata }]}]
+            include: [
+                {model: Pledge}, 
+                {model: Borrower},
+                {
+                    model: Disbursement, 
+                    include: [
+                        {model: PaymentMethod}, 
+                        {model: User}
+                    ]
+                }, 
+                {model: ReferencePerson}, 
+                {model: LoanStatus}, 
+                {model: LoanPaymentFrequence}, 
+                { 
+                    model: Versement, 
+                    include: [{ model: VersementMetadata }]
+                }
+            ],
+            order: [[{ model: Versement }, 'versement_date', 'ASC']],
         });
         res.status(200).json(loans);
     } catch (error) {
@@ -39,9 +75,30 @@ const getLoanById = async (req, res) => {
     const { loanId } = req.params;
     try {
         const loan = await Loan.findByPk(loanId, {
-            include: [{model: Pledge},  {model: Borrower}, {model: ReferencePerson}, { model: Versement, order: [
-                ['versement_id', 'DESC'],
-            ], include: [{ model: VersementMetadata }]}]
+            include: [
+                { model: Pledge },
+                { 
+                    model: Borrower,
+                    include: [{model: BorrowerAccount}]
+                },
+                { model: ReferencePerson },
+                { model: LoanStatus },
+                {
+                    model: Disbursement, 
+                    include: [
+                        {model: PaymentMethod}, 
+                        {model: User}
+                    ]
+                },
+                {
+                    model: Versement,
+                    include: [
+                        { model: VersementMetadata },
+                        { model: VersementStatus }
+                    ],
+                },
+            ],
+            order: [[{ model: Versement }, 'versement_date', 'ASC']],
         });
         if (!loan) {
             return res.status(404).json({ error: 'Loan not found' });
@@ -53,8 +110,174 @@ const getLoanById = async (req, res) => {
     }
 };
 
+// TODO: separate approuve loan to disbursement 
 const approuveLoan = async (req, res) => {
     const { loanId } = req.params;
+    console.log(req.body)
+    try {
+        let loan = await Loan.findByPk(loanId, {
+            include: [{model: ReferencePerson}]
+        });
+
+        if (!loan) {
+            return res.status(404).json({
+                message: "Loan not found!"
+            })
+        }
+        //  Check if loan is not already approuved?
+        if (loan.loan_status_id > 1) {
+            return res.status(400).json({
+                message: "Loan decision already posted!"
+            })
+        }
+
+        //  Check if the status is passed
+        if (!req.body.loan_status_id) {
+            return res.status(400).json({
+                message: "Status not been passed"
+            })
+        }
+
+        if (loan.reference_people?.length < 2) {
+            return res.status(404).json({
+                message: "Loan must have 2 reference persons!"
+            })
+        }
+
+        if (!req.body) {
+            return res.status(400).json({
+                message: "No data passed!"
+            })
+        }
+
+        // check if no irregulated loan exist in the borrower account
+        const loans = await Loan.findAll({
+            where: {
+                borrower_id: loan.borrower_id,
+                loan_status_id: {
+                    [Op.in] : [2, 3, 4, 5, 7]
+                },
+            },
+        });
+
+        // console.log(loans)
+
+        // const ids = [2, 3, 4, 5, 7]
+
+        // const irrLoan = loans.filter((curLoan) => ids.includes(curLoan.loan_status_id) )
+
+        if (loans.length > 0) {
+            return res.status(401).json({
+                message: "You are not eligible for a new Loan!"
+            })
+        }
+
+        await loan.update(req.body)
+        .then(async (loan) => {
+            await Loan.findByPk(loan.loan_id, {
+                include: [
+                    {model: Pledge}, 
+                    {model: Borrower},
+                    {
+                        model: Disbursement, 
+                        include: [
+                            {model: PaymentMethod}, 
+                            {model: User}
+                        ]
+                    }, 
+                    {model: ReferencePerson}, 
+                    {model: LoanStatus}, 
+                    {model: LoanPaymentFrequence}, 
+                    { 
+                        model: Versement, 
+                        include: [{ model: VersementMetadata }]
+                    }
+                ],
+            }).then((loan) => res.status(201).json(loan))
+        })
+        
+    } catch (err) {
+        if (err) {
+            return res.status(500).json({
+                message: "Error approuving the Loan",
+                error: err.message
+            }) 
+        }
+    }
+}
+
+const deniedLoan = async (req, res) => {
+    try {
+        const { loanId } = req.params;
+        let loan = await Loan.findByPk(loanId);
+        if (!loan) {
+            return res.status(404).json({
+                message: "Loan not found!"
+            })
+        }
+        // Check if loan is not already approuved?
+        if (!loan.loan_status_id > 1) {
+            return res.status(400).json({
+                message: "Loan already been approuved!"
+            })
+        }
+
+        loan.update({loan_status_id: 7, memo: req.body?.memo})
+        .then(async (loan) => {
+            await Loan.findByPk(loan.loan_id, {
+                include: [
+                    {model: Pledge}, 
+                    {model: Borrower},
+                    {
+                        model: Disbursement, 
+                        include: [
+                            {model: PaymentMethod}, 
+                            {model: User}
+                        ]
+                    }, 
+                    {model: ReferencePerson}, 
+                    {model: LoanStatus}, 
+                    {model: LoanPaymentFrequence}, 
+                    { 
+                        model: Versement, 
+                        include: [{ model: VersementMetadata }]
+                    }
+                ],
+            }).then((loan) => res.status(201).json(loan))
+        })
+        .catch((err) => {
+            return res.status(500).json({
+                message: "Loan not updated!",
+                error: err.message
+            })
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: "Loan not updated!",
+            error: err.message
+        })
+    }
+}
+
+const disburseLoan = async (req, res) => {
+    const { loanId } = req.params;
+
+    let loan = await Loan.findByPk(loanId);
+    if (!loan) {
+        return res.status(404).json({
+            message: "Loan not found!"
+        })
+    }
+
+    // Check if loan is not already approuved?
+    if (!loan.loan_status_id == 2) {
+        return res.status(400).json({
+            message: "Loan already loan not approuved or disbursed yet!"
+        })
+    }
+
+    const { amount_approuved, interest_rate, mortgage_length, approval_date, payment_frequence_id } = loan
+
     let totalInt = 0
     let totalLoan = 0
     const calculateInterest = (appr_amount, int_rate, mort_length) => {
@@ -104,44 +327,7 @@ const approuveLoan = async (req, res) => {
     }
 
     try {
-        let loan = await Loan.findByPk(loanId);
-        if (!loan) {
-            return res.status(404).json({
-                message: "Loan not found!"
-            })
-        }
-        // TODO: Check if loan is not already approuved?
-        if (!loan.loan_status_id > 1) {
-            return res.status(400).json({
-                message: "Loan already approuved!"
-            })
-        }
-
-        if (!req.body) {
-            return res.status(400).json({
-                message: "No data passed!"
-            })
-        }
-
-        // TODO: check if no irregulated loan exist in the borrower account
-        const loans = await Loan.findAll({
-            where: {
-                borrower_id: loan.borrower_id
-            }
-        });
-
-        const ids = [2, 3, 4, 5, 7]
-
-        const irrLoan = loans.filter((curLoan) => ids.includes(curLoan.loan_status_id) )
-
-        if (irrLoan.length > 0) {
-            return res.status(401).json({
-                message: "You are not eligible for a new Loan!"
-            })
-        }
-
-        const {amount_approuved, interest_rate, mortgage_length, status_id, approval_date, payment_frequence_id} = req.body
-
+        // const { amount_approuved, interest_rate, mortgage_length, approval_date, payment_frequence_id } = req.body
         const verms = generateLoanDetails(approval_date, mortgage_length, amount_approuved, payment_frequence_id, interest_rate)
 
         if (verms.length > 0) {
@@ -167,7 +353,29 @@ const approuveLoan = async (req, res) => {
                     await BorrowerAccount.findOne({account_number: req.body.account_number})
                     .then((account) => {
                         account.update({minimum_balance: account.minimum_balance + (loan.amount_approuved * (20/100))})
-                        .then(() => res.status(201).json(loan))
+                        .then(async () => {
+                            await Loan.findByPk(loan.loan_id, {
+                                include: [
+                                    {model: Pledge}, 
+                                    {model: Borrower},
+                                    {
+                                        model: Disbursement, 
+                                        include: [
+                                            {model: PaymentMethod}, 
+                                            {model: User}
+                                        ]
+                                    }, 
+                                    {model: ReferencePerson}, 
+                                    {model: LoanStatus}, 
+                                    {model: LoanPaymentFrequence}, 
+                                    { 
+                                        model: Versement, 
+                                        include: [{ model: VersementMetadata }]
+                                    }
+                                ],
+                                order: [[{ model: Versement }, 'versement_date', 'ASC']],
+                            }).then((loan) => res.status(201).json(loan))
+                        })
                     })
                     .catch((err) => console.log(err))
                 })
@@ -175,44 +383,15 @@ const approuveLoan = async (req, res) => {
             }).catch((err)=> {
                 // TODO: removing all added versement for data integrity
                 return res.status(500).json({
-                    message: "Error approuving the Loan"
+                    message: "Error disbursing the Loan",
+                    error: err.message
                 }) 
             })
         }
-        
-    } catch (err) {
-        if (err) console.log(err)
-    }
-}
-
-const deniedLoan = async (req, res) => {
-    try {
-        const { loanId } = req.params;
-        let loan = await Loan.findByPk(loanId);
-        if (!loan) {
-            return res.status(404).json({
-                message: "Loan not found!"
-            })
-        }
-        // TODO: Check if loan is not already approuved?
-        if (!loan.loan_status_id > 1) {
-            return res.status(400).json({
-                message: "Loan already been approuved!"
-            })
-        }
-
-        loan.update({loan_status_id: 7})
-        .then((loan) => res.status(201).json(loan))
-        .catch((err) => {
-            return res.status(500).json({
-                message: "Loan not updated!",
-                error: err.message
-            })
-        })
-    } catch (err) {
+    } catch (error) {
         return res.status(500).json({
-            message: "Loan not updated!",
-            error: err.message
+            message: "Error disbursing the Loan",
+            error: error.message
         })
     }
 }
@@ -257,7 +436,7 @@ const getLoansByApprovalDate = async (req, res) => {
         res.status(200).json(loans);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
 
@@ -268,17 +447,29 @@ const createLoan = async (req, res) => {
     try {
         // Check if the borrower exists
         const borrower = await Borrower.findByPk(borrowerId);
+
         if (!borrower) {
             return res.status(404).json({ error: 'Borrower not found' });
         }
+
         loanData.borrower_id = borrower.toJSON().borrower_id
         // Create the loan and associate it with the borrower
-        const newLoan = await Loan.create(loanData);
-        await borrower.addLoan(newLoan);
-        res.status(201).json(newLoan);
+        await Loan.create(loanData)
+        .then((loan) => {
+            let l = borrower.last_name[0]
+            let f = borrower.first_name[0]
+            const loanCaseNumber = `TKP-${l}${f}-${generateCaseNumber(loan.loan_id)}`
+            loan.update({loan_number: loanCaseNumber})
+            .then(async (loan) => {
+                await Loan.findByPk(loan.loan_id, {
+                    include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, {model: LoanStatus}, {model: LoanPaymentFrequence}, { model: Versement, include: [{ model: VersementMetadata }]}]
+                }).then((loan) => res.status(201).json(loan))
+            })
+        })
+        // await borrower.addLoan(newLoan);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
 
@@ -288,15 +479,22 @@ const updateLoan = async (req, res) => {
     try {
         const existingLoan = await Loan.findByPk(loanId);
         if (!existingLoan) {
-            return res.status(404).json({ error: 'Loan not found' });
+            return res.status(404).json({ message: 'Loan not found' });
         }
 
-        await existingLoan.update(updatedLoanData);
+        if (existingLoan.loan_status_id >= 2) {
+            return res.status(404).json({ message: 'Loan details cannot be changed after approval!' });
+        }
 
-        res.status(200).json(existingLoan);
+        await existingLoan.update(updatedLoanData)
+        .then(async (loan) => {
+            await Loan.findByPk(loan.loan_id, {
+                include: [{model: Pledge}, {model: Borrower}, {model: ReferencePerson}, {model: LoanStatus}, {model: LoanPaymentFrequence}, { model: Versement, include: [{ model: VersementMetadata }]}]
+            }).then((loan) => res.status(201).json(loan))
+        })
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
 
@@ -305,7 +503,11 @@ const deleteLoan = async (req, res) => {
     try {
         const loan = await Loan.findByPk(loanId);
         if (!loan) {
-            return res.status(404).json({ error: 'Loan not found' });
+            return res.status(404).json({ message: 'Loan not found' });
+        }
+
+        if (!loan.loan_status_id > 2) {
+            return res.status(400).json({ message: 'Loan cannot be deleted after approval!' });
         }
 
         await loan.destroy();
@@ -313,9 +515,45 @@ const deleteLoan = async (req, res) => {
         res.status(204).end();
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
+
+const checkLoanIrregulations = async (req, res) => {
+    try {
+        // const yesterday = new Date();
+        // yesterday.setDate(yesterday.getDate() - 1);
+        const versements = await Versement.update({
+            penalities: sequelize.literal(`penalities + ${penalityFee}`),
+            grand_total: sequelize.literal(`grand_total + ${penalityFee}`)
+        },{
+            where: {
+                versement_date: {
+                    [Op.lt]: formatDate(new Date(Date.now() - (60 * 60 * 1000))),
+                },
+                status_id: 1
+            },
+            returning: true
+        })
+        .then(async ([count, rowsUpdated]) => {
+            let total_penalities = 0;
+            let today_fee_amount = 0;
+            let total_charged = count;
+            rowsUpdated.forEach(row => {
+                total_penalities += row.penalities;
+                today_fee_amount += 100
+            })
+            await PenalityReport.create({
+                total_charged,
+                today_fee_amount,
+                total_penalities
+            }).then((reports) => console.table(reports.toJSON()))
+        });
+        // res.status(201).json(versements)
+    } catch (error) {
+        console.log(error)
+    } 
+}
 
 // Add other loan-related controller methods as needed
 
@@ -328,6 +566,8 @@ module.exports = {
     updateLoan,
     deleteLoan,
     approuveLoan,
-    deniedLoan
+    disburseLoan,
+    deniedLoan,
+    checkLoanIrregulations
     // Add other controller methods as needed
 };

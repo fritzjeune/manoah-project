@@ -3,20 +3,23 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const loanController = require('../controllers/Loan')
-const { getPaymentsForLoan, createPayment } = require('../controllers/Versement')
+const { getPaymentsForLoan, createPayment, payVersement } = require('../controllers/Versement')
 const pledgeController = require('../controllers/Pledge')
 const referencePersonController = require('../controllers/ReferencePerson')
 
 // Loan routes
 router.get('/approval-date', passport.authenticate('jwt', { session: false }), loanController.getLoansByApprovalDate);
 router.get('/', passport.authenticate('jwt', { session: false }), loanController.getAllLoans);
+router.get('/loans-by-date', passport.authenticate('jwt', { session: false }), loanController.checkLoanIrregulations);
 router.get('/:loanId', passport.authenticate('jwt', { session: false }), loanController.getLoanById);
 router.get('/:loanId/payments', passport.authenticate('jwt', { session: false }), getPaymentsForLoan);
 router.post('/:loanId/payments', passport.authenticate('jwt', { session: false }), createPayment);
 router.post('/:loanId/approuve-loan', passport.authenticate('jwt', { session: false }), loanController.approuveLoan);
 router.post('/:loanId/deny-loan', passport.authenticate('jwt', { session: false }), loanController.deniedLoan);
-// router.post('/loans', passport.authenticate('jwt', { session: false }), loanController.createLoan);
-// router.put('/loans/:loanId', passport.authenticate('jwt', { session: false }), loanController.updateLoan);
+router.post('/:loanId/disburse', passport.authenticate('jwt', { session: false }), loanController.disburseLoan);
+
+// Payment
+router.post('/loans/:loanId/versement/:versementId/pay', passport.authenticate('jwt', { session: false }), payVersement);
 // router.delete('/loans/:loanId', passport.authenticate('jwt', { session: false }), loanController.deleteLoan);
 
 // Pledge routes

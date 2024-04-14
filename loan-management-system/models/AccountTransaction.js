@@ -43,7 +43,7 @@ module.exports = (sequelize) => {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
             get() {
-                return parseFloat(this.getDataValue('amount')) || 0;
+                return parseFloat(this.getDataValue('balance')) || 0;
             }
         },
         memo: {

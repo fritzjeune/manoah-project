@@ -1,5 +1,6 @@
 // controllers/ReferencePerson.js
 
+const { Op } = require('sequelize');
 const {
     ReferencePerson,
     Borrower,
@@ -29,9 +30,54 @@ const addReferencePerson = async (req, res) => {
                 borrower_id: borrowerId
             },
         });
+
         if (!loan) {
             return res.status(404).json({
                 message: 'Loan not found or does not belong to the borrower'
+            });
+        }
+
+        const refAntecedant = await Loan.findAll({
+            include: [ 
+                {
+                    model: Borrower,
+                    include: [
+                        {
+                            model: Loan,
+                            attributes: ['loan_status_id'],
+                            where: {
+                                loan_status_id: {
+                                    [Op.in]: [2, 3, 4, 5]
+                                }
+                            },
+                        }
+                    ],
+                    attributes: ['nif', 'ninu'],
+                    where: {
+                        [Op.or] : [
+                            { nif: refPerson.nif },
+                            { ninu: refPerson.nif }
+                        ]
+                    }, 
+                },
+                {
+                    model: ReferencePerson,
+                    attributes: ['nif', 'last_name', 'first_name'],
+                    where: {
+                        nif: refPerson.nif 
+                    },
+                },
+            ],
+            where: {
+                loan_status_id: {
+                    [Op.in]: [2, 3, 4, 5, 7]
+                }
+            },
+        })
+
+        if (refAntecedant.length > 0) {
+            return res.status(403).json({
+                message: 'This Person is not Eligible!'
             });
         }
 
@@ -46,7 +92,8 @@ const addReferencePerson = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            error: 'Internal Server Error'
+            message: 'Internal Server Error',
+            error: error.message
         });
     }
 };

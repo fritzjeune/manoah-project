@@ -7,7 +7,8 @@ const contactController = require('../controllers/Contact');
 const loanController = require('../controllers/Loan')
 const paymentController = require('../controllers/Versement')
 const pledgeController = require('../controllers/Pledge')
-const referencePersonController = require('../controllers/ReferencePerson')
+const referencePersonController = require('../controllers/ReferencePerson');
+const { getBorrowerAccount, createBorrowerAccount } = require('../controllers/BorrowerAccount');
 
 // Define routes for Borrower
 /**
@@ -31,6 +32,10 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), borrower
 
 // Define routes for Address
 router.post('/:borrowerId/address', passport.authenticate('jwt', { session: false }), addressController.createAddress);
+
+// Define routes for Accounts
+router.get('/:borrowerId/accounts', passport.authenticate('jwt', { session: false }), getBorrowerAccount );
+router.post('/:borrowerId/accounts', passport.authenticate('jwt', { session: false }), createBorrowerAccount );
 
 // Define routes for Contact
 router.post('/:borrowerId/contact', passport.authenticate('jwt', { session: false }), contactController.createContact);

@@ -22,6 +22,8 @@ const AccountStatusModel = require('../models/AccountStatus')
 const VersementStatusModel = require('../models/VersementStatus')
 const TransactionTypeModel = require('../models/TransactionType')
 const AccountTransactionModel = require('../models/AccountTransaction')
+const PenalityReportModel = require('../models/PenalityReport')
+const DisbursementModel = require('../models/Disbursement')
 
 const sequelize = new Sequelize({
     dialect: 'postgres',
@@ -66,6 +68,8 @@ const AccountStatus = AccountStatusModel(sequelize);
 const VersementStatus = VersementStatusModel(sequelize);
 const TransactionType = TransactionTypeModel(sequelize);
 const AccountTransaction = AccountTransactionModel(sequelize);
+const Disbursement = DisbursementModel(sequelize);
+const PenalityReport = PenalityReportModel(sequelize);
 
 Borrower.hasMany(Contact, {
     foreignKey: 'borrower_id',
@@ -101,8 +105,15 @@ Loan.belongsTo(LoanStatus, {
 Loan.hasOne(LoanPaymentFrequence, {
     foreignKey: 'id'
 });
+Loan.hasOne(Disbursement, {
+    foreignKey: 'disbursement_id'
+});
 Loan.hasOne(InterestMethod, {
     foreignKey: 'id'
+});
+
+User.belongsTo(Role, {
+    foreignKey: 'role_id'
 });
 
 Versement.belongsTo(Loan, {
@@ -132,6 +143,29 @@ AccountTransaction.belongsTo(TransactionType, {
 AccountTransaction.belongsTo(BorrowerAccount, {
     foreignKey: 'borrower_account_id'
 });
+
+AccountTransaction.belongsTo(User, {
+    foreignKey: 'created_by'
+});
+
+Disbursement.belongsTo(User, {
+    foreignKey: 'created_by'
+});
+
+Disbursement.belongsTo(PaymentMethod, {
+    foreignKey: 'payment_method_id'
+})
+
+const getNextAccountNumber = async () => {
+    const query = "SELECT nextval('loan.account_number_seq') as next_value;"
+    await sequelize.query(query, {plain: true})
+    .then((result) => {
+        return result
+    }).catch((err) => {
+        console.log(err)
+    });
+    // return result.next_value;
+}
 
 // Payment.belongsTo(PaymentMethod, {
 //     foreignKey: 'payment_method_id'
@@ -168,5 +202,7 @@ module.exports = {
     AccountStatus,
     VersementStatus,
     AccountTransaction,
-    TransactionType
+    TransactionType,
+    PenalityReport,
+    Disbursement
 }

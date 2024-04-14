@@ -50,6 +50,14 @@ module.exports = (sequelize) => {
             },
             default: 2
         },
+        disbursement_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'disbursement',
+                key: 'disbursement_id',
+            },
+        },
         interest_rate: {
             type: DataTypes.DECIMAL(5, 2),
             allowNull: false,
@@ -90,6 +98,10 @@ module.exports = (sequelize) => {
             allowNull: true,
         },
         memo: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        loan_number: {
             type: DataTypes.STRING,
             allowNull: true,
         },

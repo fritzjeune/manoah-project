@@ -29,6 +29,10 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        profil_img_url: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         role_id: {
             type: DataTypes.INTEGER,
             allowNull: false,

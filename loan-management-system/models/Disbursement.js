@@ -2,18 +2,18 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    const VersementMetadata = sequelize.define('versement_metadata', {
-        id: {
+    const Disbursement = sequelize.define('disbursement', {
+        disbursement_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
-        deposit_reference_id: {
+        payment_method_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'account_transaction',
-                key: 'transaction_id',
+                model: 'payment_method',
+                key: 'id',
             },
         },
         created_by: {
@@ -24,14 +24,6 @@ module.exports = (sequelize) => {
                 key: 'user_id',
             },
         },
-        versement_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'versement',
-                key: 'versement_id',
-            },
-        },
         amount: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
@@ -39,16 +31,7 @@ module.exports = (sequelize) => {
                 return parseFloat(this.getDataValue('amount')) || 0;
             }
         },
-    });
+    }, );
 
-    // Versement.associate = (models) => {
-    //     Versement.belongsTo(models.Loan, {
-    //         foreignKey: 'loan_id'
-    //     });
-    //     Versement.belongsTo(models.VersementMetadata, {
-    //         foreignKey: 'versement_metadata_id'
-    //     });
-    // };
-
-    return VersementMetadata;
+    return Disbursement;
 };

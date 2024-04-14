@@ -19,7 +19,8 @@ const loginRoutes = require('./routes/Auth');
 const versementRoutes = require('./routes/Versement');
 const transactionRoutes = require('./routes/Transaction');
 const session = require('express-session');
-const verifyTokenInDatabase = require('./middlewares/Auth')
+const verifyTokenInDatabase = require('./middlewares/Auth');
+const { checkLoanIrregulations } = require('./controllers/Loan');
 // const passportConfig = require('./config/passport');
 
 const app = express();
@@ -77,11 +78,14 @@ passport.use(
 );
 
 
-// // Schedule a task to run every 15 seconds
-// cron.schedule('*/15 * * * * *', () => {
-//     // Your task logic goes here
-//     console.log('Task executed every 15 seconds');
-// });
+// Schedule a task to run every 15 seconds
+cron.schedule('0 0 0 * * *', () => {
+    // Your task logic goes here
+    checkLoanIrregulations()
+    console.log('Task executed every 15 seconds');
+});
+
+
 
 // Middleware
 app.use(express.json());
@@ -111,10 +115,6 @@ app.use('/api/account', transactionRoutes);
 // Apply verification middleware after initializing Passport
 app.use(verifyTokenInDatabase);
 
-// Routes
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-});
 
 // Start the server
 sequelize
@@ -122,6 +122,7 @@ sequelize
     .then(() => {
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
+            console.log(new Date())
         });
     })
     .catch((err) => {

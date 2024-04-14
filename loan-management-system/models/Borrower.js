@@ -55,7 +55,11 @@ module.exports = (sequelize) => {
         },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
+        },
+        profil_img_url: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
         created_by: {
             type: DataTypes.INTEGER,

@@ -60,6 +60,31 @@ const getPaymentsForLoan = async (req, res) => {
     }
 };
 
+const payVersement = async (req, res) => {
+    try {
+        const {loanId, versementId} = req.params
+        // verify that the versement exist by its Id 
+        const versement = await Versement.findOne({
+            where: {
+                versement_id: versementId,
+                loan_id: loanId
+            }
+        })
+
+        console.log(versement)
+        // Verify account number 
+        // Check the user doing the transaction
+        // Check the amount passed
+        // create a payment metadata
+        // create a transaction in the borrower account 
+        // mark the versement as paid
+        // return the loan
+        // versement_id, account_number, amount, 
+    } catch (err) {
+        
+    }
+}
+
 const updatePayment = async (req, res) => {
     const paymentId = req.params.id;
     // const {borrowerid, loanId} = req.params
@@ -116,5 +141,6 @@ module.exports = {
     createPayment,
     getPaymentsForLoan,
     updatePayment,
-    deletePayment
+    deletePayment,
+    payVersement
 }

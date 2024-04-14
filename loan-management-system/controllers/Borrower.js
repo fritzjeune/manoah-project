@@ -1,4 +1,4 @@
-const { Borrower, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod, BorrowerAccount, Versement, VersementMetadata } = require('../config/sequelize');
+const { Borrower, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod, BorrowerAccount, Versement, VersementMetadata, AccountStatus, AccountTransaction, sequelize } = require('../config/sequelize');
 const { generateCaseNumber } = require('../middlewares/date');
 
 // Controller methods for Borrower
@@ -9,9 +9,13 @@ const getAllBorrowers = async (req, res) => {
             include: [
                 { model: Address },
                 { model: Contact },
-                { model: BorrowerAccount },
+                { model: BorrowerAccount, include: [{ model: AccountStatus }, { model: AccountTransaction }] },
                 { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}] }
-            ]
+            ],
+            // attributes: [
+            //     [sequelize.fn('FORMAT', sequelize.cast(sequelize.col('borrower.createdAt'), 'VARCHAR'), 'yyyy-mm-dd'), 'createdAt']
+            // ],
+            order: [[sequelize.col('borrower.createdAt'), 'DESC']],
         });
         res.status(200).json(borrowers);
     } catch (error) {
@@ -27,9 +31,10 @@ const getBorrowerById = async (req, res) => {
             include: [
                 { model: Address },
                 { model: Contact },
-                { model: BorrowerAccount },
+                { model: BorrowerAccount, include: [{ model: AccountStatus }, { model: AccountTransaction }] },
                 { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
-            ]
+            ],
+            order: [[{model: BorrowerAccount}, {model: AccountTransaction}, 'createdAt', 'DESC']],
         });
         if (!borrower) {
             return res.status(404).json({ error: 'Borrower not found' });
@@ -77,10 +82,20 @@ const createBorrower = async (req, res) => {
             const createdContacts = await Contact.bulkCreate(contactDataArray);
             // await newBorrower.setContacts(createdContacts);
         }
-        incremNumber = generateCaseNumber(newBorrower.borrower_id)
+
+        const query = "SELECT nextval('loan.account_number_seq') as next_value;"
+        const accNum = await sequelize.query(query, {plain: true})
+
+        if (!accNum) {
+            return res.status(404).json({
+                message: "Account number not generated due to some server error"
+            })
+        }
+
+        incremNumber = generateCaseNumber(accNum.next_value)
         console.log(incremNumber)
 
-        const borrower_account = await BorrowerAccount.create({
+        await BorrowerAccount.create({
             borrower_id: newBorrower.borrower_id,
             devise: 1,
             balance: 0,
@@ -93,7 +108,7 @@ const createBorrower = async (req, res) => {
             include: [
                 { model: Address },
                 { model: Contact },
-                { model: BorrowerAccount },
+                { model: BorrowerAccount, include: [{ model: AccountStatus }, { model: AccountTransaction }] },
                 { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
             ]
         });
@@ -106,8 +121,6 @@ const createBorrower = async (req, res) => {
     }
 };
 
-console.log(generateCaseNumber(19))
-
 const updateBorrower = async (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
@@ -116,8 +129,18 @@ const updateBorrower = async (req, res) => {
         if (!borrower) {
             return res.status(404).json({ error: 'Borrower not found' });
         }
-        await borrower.update(updatedData);
-        res.status(200).json(borrower);
+        await borrower.update(updatedData)
+        .then(async (borrower) => {
+            await Borrower.findByPk(borrower.borrower_id, {
+                include: [
+                    { model: Address },
+                    { model: Contact },
+                    { model: BorrowerAccount, include: [{ model: AccountStatus }, { model: AccountTransaction }] },
+                    { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
+                ]
+            })
+            .then((borrower) => res.status(200).json(borrower))
+        })
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

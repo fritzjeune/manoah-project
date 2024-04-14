@@ -23,30 +23,51 @@ module.exports = (sequelize) => {
         versement_amount: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('versement_amount')) || 0;
+            }
         },
         capital: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('capital')) || 0;
+            }
         },
         balance_capital: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('balance_capital')) || 0;
+            }
         },
         balance_interest: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('balance_interest')) || 0;
+            }
         },
         grand_total: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('grand_total')) || 0;
+            }
         },
         interest: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('interest')) || 0;
+            }
         },
         penalities: {
             type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
+            get() {
+                return parseFloat(this.getDataValue('penalities')) || 0;
+            }
         },
         status_id: {
             type: DataTypes.INTEGER,

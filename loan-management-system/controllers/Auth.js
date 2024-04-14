@@ -2,7 +2,8 @@
 
 const {
     Token,
-    User
+    User,
+    Role
 } = require('../config/sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -37,7 +38,8 @@ const login = async (req, res) => {
         const user = await User.findOne({
             where: {
                 username
-            }
+            },
+            include: [{model: Role}]
         });
 
         // If user not found or password is incorrect, return unauthorized
