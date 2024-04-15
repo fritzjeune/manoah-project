@@ -1,7 +1,18 @@
 // controllers/PaymentController.js
 const {
     Versement,
-    Loan
+    Loan,
+    BorrowerAccount,
+    VersementMetadata,
+    AccountTransaction,
+    User,
+    PaymentMethod,
+    Disbursement,
+    ReferencePerson,
+    LoanStatus,
+    LoanPaymentFrequence,
+    Borrower,
+    Pledge
 } = require('../config/sequelize');
 
 // amount_approved, mortgage_length, interest_rate, approved_date
@@ -64,6 +75,12 @@ const payVersement = async (req, res) => {
     try {
         const {loanId, versementId} = req.params
         // verify that the versement exist by its Id 
+        if (!req.body.amount || !req.body.account_id) {
+            return res.status(404).json({
+                message: "Incorrect request, Infos missed!"
+            })
+        }
+
         const versement = await Versement.findOne({
             where: {
                 versement_id: versementId,
@@ -71,17 +88,118 @@ const payVersement = async (req, res) => {
             }
         })
 
-        console.log(versement)
+        if (!versement) {
+            return res.status(404).json({
+                message: "Versement not found"
+            })
+        }
+
+        if (versement.status_id == 4) {
+            return res.status(404).json({
+                message: "Versement already paid"
+            })
+        }
+
+        const { amount, account_id } = req.body
+
         // Verify account number 
+        const account = await BorrowerAccount.findByPk(account_id)
+
+        if (!account || (account.account_status_id > 3)) {
+            return res.status(403).json({
+                message: "Account Number not eligible for payments"
+            })
+        }
+
         // Check the user doing the transaction
+        const user = req.user.user_id
+
+        let versementStatus = 4
+        let amountConverted = parseFloat(amount)
         // Check the amount passed
-        // create a payment metadata
+        if ( amountConverted < versement.grand_total ) {
+            versementStatus = 3
+        }
+
         // create a transaction in the borrower account 
-        // mark the versement as paid
+        const deposit = await AccountTransaction.create({
+            borrower_account_id: account.account_id,
+            amount: amountConverted >= versement.grand_total ? versement.grand_total : amountConverted ,
+            balance: account.balance,
+            transaction_type_id: 3,
+            created_by: user
+        })
+
+        // TODO: check if deposit passed
+
+        if (amountConverted > versement.grand_total) {
+            await AccountTransaction.create({
+                borrower_account_id: account.account_id,
+                amount: amountConverted - versement.grand_total ,
+                balance: account.balance + (amountConverted - versement.grand_total),
+                transaction_type_id: 1,
+                created_by: user
+            })
+        }
+
+        if (!deposit) {
+            return res.status(500).json({
+                message: "Transaction failed!"
+            })
+        }
+
+        // create a payment metadata
+        await VersementMetadata.create({
+            created_by: user,
+            amount: amountConverted,
+            deposit_reference_id: deposit.transaction_id,
+            versement_id: versement.versement_id
+        })
+        .then(async (verMTD) => {
+            // mark the versement as paid
+            await versement.update({
+                status_id: amountConverted >= versement.grand_total ? 4 : 3,
+                grand_total: versement.grand_total - deposit.amount
+            })
+            .then(async (vers) => {
+                await Loan.findByPk(loanId, {
+                    include: [
+                        {model: Pledge}, 
+                        {model: Borrower},
+                        {
+                            model: Disbursement, 
+                            include: [
+                                {model: PaymentMethod}, 
+                                {model: User}
+                            ]
+                        }, 
+                        {model: ReferencePerson}, 
+                        {model: LoanStatus}, 
+                        {model: LoanPaymentFrequence}, 
+                        { 
+                            model: Versement, 
+                            include: [{ model: VersementMetadata }]
+                        }
+                    ],
+                    order: [[{ model: Versement }, 'versement_date', 'ASC']],
+                }).then((loan) => res.status(201).json(loan))
+            })
+        })
+        .catch((err) => {
+            if (err) {
+                return res.status(500).json({
+                    message: "Versement metadata not created",
+                    error: err.message
+                })
+            }
+        })
+
         // return the loan
-        // versement_id, account_number, amount, 
     } catch (err) {
-        
+        return res.status(500).json({
+            message: "Some server error occure while making the payment",
+            error: err.message
+        })
     }
 }
 

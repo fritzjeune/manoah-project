@@ -8,7 +8,7 @@ const loanController = require('../controllers/Loan')
 const paymentController = require('../controllers/Versement')
 const pledgeController = require('../controllers/Pledge')
 const referencePersonController = require('../controllers/ReferencePerson');
-const { getBorrowerAccount, createBorrowerAccount } = require('../controllers/BorrowerAccount');
+const { getBorrowerAccount, createBorrowerAccount, getBorrowerAccounts } = require('../controllers/BorrowerAccount');
 
 // Define routes for Borrower
 /**
@@ -34,7 +34,8 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), borrower
 router.post('/:borrowerId/address', passport.authenticate('jwt', { session: false }), addressController.createAddress);
 
 // Define routes for Accounts
-router.get('/:borrowerId/accounts', passport.authenticate('jwt', { session: false }), getBorrowerAccount );
+router.get('/:borrowerId/accounts/:accountId', passport.authenticate('jwt', { session: false }), getBorrowerAccount );
+router.get('/:borrowerId/accounts', passport.authenticate('jwt', { session: false }), getBorrowerAccounts );
 router.post('/:borrowerId/accounts', passport.authenticate('jwt', { session: false }), createBorrowerAccount );
 
 // Define routes for Contact
@@ -49,11 +50,11 @@ router.put('/:borrowerId/loans/:loanId', passport.authenticate('jwt', { session:
 router.delete('/:borrowerId/loans/:loanId', passport.authenticate('jwt', { session: false }), loanController.deleteLoan);
 
 // Payment routes
-router.post('/:borrowerId/loans/:loanId/payments/', passport.authenticate('jwt', { session: false }), paymentController.createPayment);
-router.put('/:borrowerId/loans/:loanId/payments/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.updatePayment);
-router.delete('/:borrowerId/loans/:loanId/payments/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.deletePayment);
-// router.get('/:borrowerId/loans/:loanId/payments/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.deletePayment);
-router.get('/:borrowerId/loans/:loanId/payments/', passport.authenticate('jwt', { session: false }), paymentController.getPaymentsForLoan);
+// router.post('/:borrowerId/loans/:loanId/payments/', passport.authenticate('jwt', { session: false }), paymentController.createPayment);
+// router.put('/:borrowerId/loans/:loanId/payments/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.updatePayment);
+// router.delete('/:borrowerId/loans/:loanId/payments/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.deletePayment);
+// // router.get('/:borrowerId/loans/:loanId/payments/:paymentId', passport.authenticate('jwt', { session: false }), paymentController.deletePayment);
+// router.get('/:borrowerId/loans/:loanId/payments/', passport.authenticate('jwt', { session: false }), paymentController.getPaymentsForLoan);
 
 // Pledge routes
 router.get('/:borrowerId/loans/:loanId/pledge/', passport.authenticate('jwt', { session: false }), pledgeController.getAllPledges);

@@ -28,7 +28,7 @@ const DisbursementModel = require('../models/Disbursement')
 const sequelize = new Sequelize({
     dialect: 'postgres',
     host: '127.0.0.1',
-    port: '5432',
+    port: '5433',
     schema: 'loan',
     username: 'postgres',
     password: 'MoveAhead',

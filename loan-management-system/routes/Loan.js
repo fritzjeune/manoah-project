@@ -12,14 +12,16 @@ router.get('/approval-date', passport.authenticate('jwt', { session: false }), l
 router.get('/', passport.authenticate('jwt', { session: false }), loanController.getAllLoans);
 router.get('/loans-by-date', passport.authenticate('jwt', { session: false }), loanController.checkLoanIrregulations);
 router.get('/:loanId', passport.authenticate('jwt', { session: false }), loanController.getLoanById);
-router.get('/:loanId/payments', passport.authenticate('jwt', { session: false }), getPaymentsForLoan);
-router.post('/:loanId/payments', passport.authenticate('jwt', { session: false }), createPayment);
+
+// router.get('/:loanId/payments', passport.authenticate('jwt', { session: false }), getPaymentsForLoan);
+// router.post('/:loanId/payments', passport.authenticate('jwt', { session: false }), createPayment);
+
 router.post('/:loanId/approuve-loan', passport.authenticate('jwt', { session: false }), loanController.approuveLoan);
 router.post('/:loanId/deny-loan', passport.authenticate('jwt', { session: false }), loanController.deniedLoan);
 router.post('/:loanId/disburse', passport.authenticate('jwt', { session: false }), loanController.disburseLoan);
 
 // Payment
-router.post('/loans/:loanId/versement/:versementId/pay', passport.authenticate('jwt', { session: false }), payVersement);
+router.post('/:loanId/versements/:versementId/pay', passport.authenticate('jwt', { session: false }), payVersement);
 // router.delete('/loans/:loanId', passport.authenticate('jwt', { session: false }), loanController.deleteLoan);
 
 // Pledge routes

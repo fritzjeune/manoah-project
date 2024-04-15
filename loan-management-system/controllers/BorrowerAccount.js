@@ -33,6 +33,40 @@ const getAccountById = async (req, res) => {
 
 const getBorrowerAccount = async (req, res) => {
     try {
+        const { borrowerId, accountId } = req.params
+        console.log(borrowerId)
+        const account = await BorrowerAccount.findOne({
+            where: {
+                    borrower_id: borrowerId,
+                    account_id: accountId
+                },
+            include: [
+                { model: Borrower }, 
+                { model: AccountStatus }, 
+                { 
+                    model: AccountTransaction,
+                    include: [{model: TransactionType}]
+                }, 
+            ]
+        })
+
+        if (account.length == 0) {
+            return res.status(404).json({
+                message: "Account not found!"
+            })
+        }
+
+        res.status(201).json(account)
+    } catch (error) {
+        return res.status(404).json({
+            message: "Some server errors!",
+            error: error.message
+        })
+    }
+}
+
+const getBorrowerAccounts = async (req, res) => {
+    try {
         const { borrowerId } = req.params
         console.log(borrowerId)
         const account = await BorrowerAccount.findAll({
@@ -51,7 +85,7 @@ const getBorrowerAccount = async (req, res) => {
 
         if (account.length == 0) {
             return res.status(404).json({
-                message: "Account not found!"
+                message: "No Accounts found!"
             })
         }
 
@@ -319,6 +353,7 @@ module.exports = {
     Deposit,
     withDraw,
     getBorrowerAccount, 
+    getBorrowerAccounts,
     getAccountById,
     createBorrowerAccount
 }
