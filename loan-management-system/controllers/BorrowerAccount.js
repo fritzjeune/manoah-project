@@ -73,7 +73,10 @@ const getBorrowerAccounts = async (req, res) => {
             where: {
                     borrower_id: borrowerId
                 },
-            include: [
+            include: req.query.min ? [
+                { model: Borrower, attributes: ['last_name', 'first_name', 'borrower_id']}, 
+                { model: AccountStatus },
+            ] : [
                 { model: Borrower }, 
                 { model: AccountStatus }, 
                 { 
@@ -270,6 +273,10 @@ const Deposit = async (req, res) => {
     }
 
 }
+
+// const accWithdrawal = () => {
+
+// }
 
 const withDraw = async (req, res) => {
     try {

@@ -117,14 +117,27 @@ const payVersement = async (req, res) => {
         let versementStatus = 4
         let amountConverted = parseFloat(amount)
         // Check the amount passed
+
+        if (!amountConverted || amountConverted == 0) {
+            return res.status(403).json({
+                message: "Not enough funds!"
+            })
+        }
+
         if ( amountConverted < versement.grand_total ) {
             versementStatus = 3
+        }
+
+        // check if penalities are applied...
+        if (versement.penalities > 0) {
+
         }
 
         // create a transaction in the borrower account 
         const deposit = await AccountTransaction.create({
             borrower_account_id: account.account_id,
-            amount: amountConverted >= versement.grand_total ? versement.grand_total : amountConverted ,
+            // amount: amountConverted >= versement.grand_total ? versement.grand_total - versement.penalities : amountConverted >= versement.versement_amount ? versement.versement_amount : amountConverted,
+            amount: amountConverted >= versement.grand_total ? versement.grand_total : amountConverted,
             balance: account.balance,
             transaction_type_id: 3,
             created_by: user

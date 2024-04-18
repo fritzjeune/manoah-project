@@ -105,7 +105,7 @@ Loan.belongsTo(LoanStatus, {
 Loan.hasOne(LoanPaymentFrequence, {
     foreignKey: 'id'
 });
-Loan.hasOne(Disbursement, {
+Loan.belongsTo(Disbursement, {
     foreignKey: 'disbursement_id'
 });
 Loan.hasOne(InterestMethod, {

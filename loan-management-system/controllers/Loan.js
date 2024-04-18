@@ -1,4 +1,4 @@
-const {sequelize, Loan, LoanStatus, Borrower, Pledge, ReferencePerson, LoanPaymentFrequence, VersementMetadata, Versement, VersementStatus, BorrowerAccount, PenalityReport, Disbursement, PaymentMethod, User} = require('../config/sequelize');
+const {sequelize, Loan, LoanStatus, Borrower, Pledge, ReferencePerson, LoanPaymentFrequence, VersementMetadata, Versement, VersementStatus, BorrowerAccount, PenalityReport, Disbursement, PaymentMethod, User, AccountTransaction} = require('../config/sequelize');
 const { Op } = require('sequelize');
 const { getListDateFromRange, generateCaseNumber, formatDate } = require('../middlewares/date');
 const penalityFee = 100
@@ -17,7 +17,7 @@ const getAllLoansForBorrower = async (req, res) => {
                     model: Disbursement, 
                     include: [
                         {model: PaymentMethod}, 
-                        {model: User}
+                        {model: User, attributes: ['user_id', 'last_name', 'first_name']}
                     ]
                 }, 
                 {model: ReferencePerson}, 
@@ -51,7 +51,7 @@ const getAllLoans = async (req, res) => {
                     model: Disbursement, 
                     include: [
                         {model: PaymentMethod}, 
-                        {model: User}
+                        {model: User, attributes: ['user_id', 'last_name', 'first_name']}
                     ]
                 }, 
                 {model: ReferencePerson}, 
@@ -87,7 +87,7 @@ const getLoanById = async (req, res) => {
                     model: Disbursement, 
                     include: [
                         {model: PaymentMethod}, 
-                        {model: User}
+                        {model: User, attributes: ['user_id', 'last_name', 'first_name']}
                     ]
                 },
                 {
@@ -113,11 +113,18 @@ const getLoanById = async (req, res) => {
 // TODO: separate approuve loan to disbursement 
 const approuveLoan = async (req, res) => {
     const { loanId } = req.params;
+    const user = req.user.user_id
     console.log(req.body)
     try {
         let loan = await Loan.findByPk(loanId, {
-            include: [{model: ReferencePerson}]
+            include: [{model: ReferencePerson}, {model: Borrower, include: [{model: BorrowerAccount}]}]
         });
+
+        if (!req.body.amount_approuved || !req.body.approval_date) {
+            return res.status(404).json({
+                message: "No amount approuved or Aprroval date!"
+            })
+        }
 
         if (!loan) {
             return res.status(404).json({
@@ -131,10 +138,9 @@ const approuveLoan = async (req, res) => {
             })
         }
 
-        //  Check if the status is passed
-        if (!req.body.loan_status_id) {
+        if (loan.borrower.borrower_accounts.length == 0) {
             return res.status(400).json({
-                message: "Status not been passed"
+                message: "Loan is not connected to any account!"
             })
         }
 
@@ -171,9 +177,45 @@ const approuveLoan = async (req, res) => {
                 message: "You are not eligible for a new Loan!"
             })
         }
+        req.body.loan_status_id = 2
+        const account = await BorrowerAccount.findByPk(loan.borrower.borrower_accounts[0]?.account_id)
 
-        await loan.update(req.body)
-        .then(async (loan) => {
+        if (!account) {
+            return res.status(401).json({
+                message: "Borrower account cannot be found!"
+            })
+        }
+
+        if ([1, 4, 5].includes(account.account_status_id)) {
+            return res.status(401).json({
+                message: "Borrower account not active!!"
+            })
+        }
+
+        // TODO: create the TKP account from which i ll catch the money to feed the loans
+        // add the loan amount approve to the borrower account
+        const transaction = await AccountTransaction.create({
+            borrower_account_id: account.account_id,
+            created_by: user,
+            amount: parseInt(req.body?.amount_approuved),
+            transaction_type_id: 1,
+            balance: account.balance + parseInt(req.body?.amount_approuved),
+            memo: "Disbursed from TKP"
+        })
+
+        if (!transaction) {
+            return res.status(401).json({
+                message: "Transaction failed due to some system errors!"
+            })
+        }
+
+        loan = await loan.update(req.body)
+        
+        await account.update({
+            minimum_balance: account.minimum_balance + (loan.amount_approuved * (20/100)),
+            balance: account.balance + parseInt(req.body?.amount_approuved)
+        })
+        .then(async () => {
             await Loan.findByPk(loan.loan_id, {
                 include: [
                     {model: Pledge}, 
@@ -182,7 +224,7 @@ const approuveLoan = async (req, res) => {
                         model: Disbursement, 
                         include: [
                             {model: PaymentMethod}, 
-                            {model: User}
+                            {model: User, attributes: ['user_id', 'last_name', 'first_name']}
                         ]
                     }, 
                     {model: ReferencePerson}, 
@@ -232,7 +274,7 @@ const deniedLoan = async (req, res) => {
                         model: Disbursement, 
                         include: [
                             {model: PaymentMethod}, 
-                            {model: User}
+                            {model: User, attributes: ['user_id', 'last_name', 'first_name']}
                         ]
                     }, 
                     {model: ReferencePerson}, 
@@ -261,6 +303,14 @@ const deniedLoan = async (req, res) => {
 
 const disburseLoan = async (req, res) => {
     const { loanId } = req.params;
+    const user = req.user.user_id
+    console.log("LOAN DISBURSEMENT")
+
+    if (!user) {
+        return res.status(404).json({
+            message: "You are not authenticated, please login!"
+        })
+    }
 
     let loan = await Loan.findByPk(loanId);
     if (!loan) {
@@ -295,6 +345,8 @@ const disburseLoan = async (req, res) => {
             } else {
                 amortDates = getListDateFromRange(appr_date, mort_length, "m")
             }
+
+            console.table(getListDateFromRange(appr_date, mort_length, "m"))
             
             totalInt = calculateInterest(appr_amount, int_rate, mort_length)
             totalLoan = appr_amount + totalInt
@@ -328,6 +380,7 @@ const disburseLoan = async (req, res) => {
 
     try {
         // const { amount_approuved, interest_rate, mortgage_length, approval_date, payment_frequence_id } = req.body
+        console.log(approval_date, mortgage_length, amount_approuved, payment_frequence_id, interest_rate )
         const verms = generateLoanDetails(approval_date, mortgage_length, amount_approuved, payment_frequence_id, interest_rate)
 
         if (verms.length > 0) {
@@ -338,21 +391,40 @@ const disburseLoan = async (req, res) => {
                     await Versement.create(verse)
                 })
             ).then(async () => {
-                console.log(req.body)
+                // create the disbursement object
+                const disbursement = await Disbursement.create({
+                    created_by: user,
+                    amount: loan.amount_approuved,
+                    payment_method_id: req.body.payment_method_id || 1
+                })
+
+                if(!disbursement) {
+                    return res.status(400).json({
+                        message: "Some error disbursing the loan!"
+                    })
+                }
+
                 req.body.total_interest = totalInt
                 req.body.total_loan = totalLoan
-                console.log(req.body)
+                req.body.loan_status_id = 3
+                req.body.disbursement_id = disbursement.disbursement_id
+                // Ill use the amount approuved (without case analisis fee)
+
+                // console.log(req.body)
+                // update the loan
+
                 await loan.update(req.body, {
-                    where: {loan_id: loanId},
-                    returning: true,
-                    include: [{model: Pledge},  {model: Borrower}, {model: ReferencePerson}, { model: Versement, order: [
-                        // ['id', 'DESC'],
-                        ['versement_date', 'ASC'],
-                    ], include: [{ model: VersementMetadata }, {model: VersementStatus}]}]
+                    where: {loan_id: loan.loan_id}
                 }).then(async (loan) => {
                     await BorrowerAccount.findOne({account_number: req.body.account_number})
-                    .then((account) => {
-                        account.update({minimum_balance: account.minimum_balance + (loan.amount_approuved * (20/100))})
+                    .then(async (account) => {
+                        await AccountTransaction.create({
+                            borrower_account_id: account.account_id,
+                            transaction_type_id: 2,
+                            amount: amount_approuved,
+                            created_by: user,
+                            balance: account.balance 
+                        })
                         .then(async () => {
                             await Loan.findByPk(loan.loan_id, {
                                 include: [
@@ -362,7 +434,7 @@ const disburseLoan = async (req, res) => {
                                         model: Disbursement, 
                                         include: [
                                             {model: PaymentMethod}, 
-                                            {model: User}
+                                            {model: User, attributes: ['user_id', 'last_name', 'first_name']}
                                         ]
                                     }, 
                                     {model: ReferencePerson}, 
@@ -375,7 +447,8 @@ const disburseLoan = async (req, res) => {
                                 ],
                                 order: [[{ model: Versement }, 'versement_date', 'ASC']],
                             }).then((loan) => res.status(201).json(loan))
-                        })
+                            .catch((err) => console.log(err))
+                        }).catch((err) => console.log(err))
                     })
                     .catch((err) => console.log(err))
                 })
@@ -531,7 +604,7 @@ const checkLoanIrregulations = async (req, res) => {
                 versement_date: {
                     [Op.lt]: formatDate(new Date(Date.now() - (60 * 60 * 1000))),
                 },
-                status_id: 1
+                status_id: 3
             },
             returning: true
         })

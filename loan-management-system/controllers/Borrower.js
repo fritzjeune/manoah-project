@@ -1,4 +1,4 @@
-const { Borrower, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod, BorrowerAccount, Versement, VersementMetadata, AccountStatus, AccountTransaction, sequelize } = require('../config/sequelize');
+const { Borrower, Address, Contact, Loan, Pledge, PaymentMethod, ReferencePerson, LoanPaymentFrequence, LoanStatus, InterestMethod, BorrowerAccount, Versement, VersementMetadata, AccountStatus, AccountTransaction, sequelize, Disbursement } = require('../config/sequelize');
 const { generateCaseNumber } = require('../middlewares/date');
 
 // Controller methods for Borrower
@@ -10,7 +10,7 @@ const getAllBorrowers = async (req, res) => {
                 { model: Address },
                 { model: Contact },
                 { model: BorrowerAccount, include: [{ model: AccountStatus }, { model: AccountTransaction }] },
-                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}] }
+                { model: Loan, include: [{model: Pledge}, { model: Disbursement }, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}] }
             ],
             // attributes: [
             //     [sequelize.fn('FORMAT', sequelize.cast(sequelize.col('borrower.createdAt'), 'VARCHAR'), 'yyyy-mm-dd'), 'createdAt']
@@ -32,7 +32,7 @@ const getBorrowerById = async (req, res) => {
                 { model: Address },
                 { model: Contact },
                 { model: BorrowerAccount, include: [{ model: AccountStatus }, { model: AccountTransaction }] },
-                { model: Loan, include: [{model: Pledge}, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
+                { model: Loan, include: [{model: Pledge},{ model: Disbursement }, {model: ReferencePerson}, { model: Versement, include: [{ model: VersementMetadata }]}, {model: LoanPaymentFrequence}, {model: LoanStatus}, {model: InterestMethod}] }
             ],
             order: [[{model: BorrowerAccount}, {model: AccountTransaction}, 'createdAt', 'DESC']],
         });
