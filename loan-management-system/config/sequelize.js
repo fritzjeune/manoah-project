@@ -34,7 +34,7 @@ const sequelize = new Sequelize({
     schema: process.env.DB_SCHEMA,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'postgres',
+    database: process.env.DB_NAME,
     logging: console.log,
     define: {
         freezeTableName: true,
