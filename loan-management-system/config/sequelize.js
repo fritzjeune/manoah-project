@@ -25,13 +25,15 @@ const AccountTransactionModel = require('../models/AccountTransaction')
 const PenalityReportModel = require('../models/PenalityReport')
 const DisbursementModel = require('../models/Disbursement')
 
+console.log(process.env.DB_HOST)
+
 const sequelize = new Sequelize({
     dialect: 'postgres',
-    host: '127.0.0.1',
-    port: '5433',
-    schema: 'loan',
-    username: 'postgres',
-    password: 'MoveAhead',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    schema: process.env.DB_SCHEMA,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     database: 'postgres',
     logging: console.log,
     define: {

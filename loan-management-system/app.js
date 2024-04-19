@@ -1,4 +1,5 @@
 const express = require('express');
+require("dotenv").config()
 const cron = require('node-cron');
 const cors = require('cors')
 const passport = require('passport');
